@@ -5,12 +5,12 @@
 
 
 > 🌱 I’m currently learning Spring Boot, Kubernetes, and AWS.
->
-> 
+
+ 
 > 💼 I’m looking to collaborate on Open Source Projects and Enterprise Application Development.
 
  
-> 📫 You can reach me at shramikcodesinjava@gmail.com.
+> 📫 You can reach me at shramikcodesinjava@gmail.com
 
  
 > 😄 Pronouns: He/Him
