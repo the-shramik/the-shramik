@@ -1,5 +1,5 @@
 # 💫 About Me:
-👋 Hi, I’m Shramik (@the-shramik)<br>👀 I’m interested in Java Development, Microservices, and Cloud Computing.<br>🌱 I’m currently learning Spring Boot, Kubernetes, and AWS.<br>💼 I’m looking to collaborate on Open Source Projects and Enterprise Application Development.<br>📫 You can reach me at shramikcodesinjava@gmail.com<br>😄 Pronouns: He/Him<br>⚡ Fun fact: When I'm not coding, I'm exploring new hiking trails or trying out the latest coffee blends.<br>
+👋 Hi, I’m Shramik (@the-shramik)<br>👀 I’m interested in Java Development, Microservices, and Cloud Computing.<br>🌱 I’m currently learning Spring Boot, Kubernetes, and AWS.<br>💼 I’m looking to collaborate on Open Source Projects and Enterprise Application Development.<br>📫 You can reach me at shramik0076@gmail.com<br>😄 Pronouns: He/Him<br>⚡ Fun fact: When I'm not coding, I'm exploring new hiking trails or trying out the latest coffee blends.<br>
 
 
 ## 🌐 Socials:
