@@ -1,6 +1,12 @@
 # 💫 About Me:
-👋 Hi, I’m Shramik (@the-shramik)<br>👀 I’m interested in Java Development, Microservices, and Cloud Computing.<br>🌱 I’m currently learning Spring Boot, Kubernetes, and AWS.<br>💼 I’m looking to collaborate on Open Source Projects and Enterprise Application Development.<br>📫 You can reach me at shramik0076@gmail.com<br>😄 Pronouns: He/Him<br>⚡ Fun fact: When I'm not coding, I'm exploring new hiking trails or trying out the latest coffee blends.<br>
-
+👋 Hi, I’m Shramik (@the-shramik)<br>  
+👀 Passionate about **Java Development, Microservices, and Cloud Computing**.<br>  
+💻 Experienced in building **Spring Boot applications**, integrating **Spring AI** and **LangChain** for AI-powered solutions, and deploying production-ready services.<br>  
+🌱 Currently learning **System Design** to architect scalable and efficient backend systems.<br>  
+💼 Open to collaborating on **Open Source Projects** and **Enterprise Application Development**.<br>  
+📫 Reach me at **shramik0076@gmail.com**<br>  
+😄 Pronouns: He/Him<br>  
+⚡ Fun fact: When I’m not coding, I love exploring new hiking trails or trying out the latest coffee blends.<br>  
 
 ## 🌐 Socials:
 [![Instagram](https://img.shields.io/badge/Instagram-%23E4405F.svg?logo=Instagram&logoColor=white)](https://www.instagram.com/http._shramik/) 
