@@ -1,4 +1,8 @@
 # 💫 About Me:
+<table>
+  <tr>
+    <td>
+
 👋 Hi, I’m Shramik (@the-shramik)  
 👀 Passionate about **Java Development, Microservices, and Cloud Computing**  
 💻 Experienced in **Spring Boot development**, leveraging **Spring AI** and **LangChain** to create AI-powered solutions, and deploying them as **scalable, production-grade systems**  
@@ -7,6 +11,13 @@
 📫 Reach me at **shramik0076@gmail.com**  
 😄 Pronouns: He/Him  
 ⚡ Fun fact: When I’m not coding, I love exploring hiking trails or trying out new coffee blends  
+
+   </td>
+   <td align="center">
+     <img src="https://github.com/the-shramik/the-shramik/blob/master/Astronaut%20https___dribbble_com_shots_3036187-Astronaut%20%23digitalart%20%23art%20%23graphics%20%23graphicdesign%20%23design%20%23illustration%20%23animation%20%23vector%20%23dribbble.gif" width="300" alt="Astronaut GIF"/>
+   </td>
+  </tr>
+</table>
 
 ---
 
