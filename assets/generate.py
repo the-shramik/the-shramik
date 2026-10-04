@@ -298,7 +298,7 @@ def footer():
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="Thanks for visiting">
   <defs>
     <linearGradient id="fsky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#04122a" stop-opacity="0"/>
+      <stop offset="0" stop-color="#062033"/>
       <stop offset=".45" stop-color="#04122a"/>
       <stop offset="1" stop-color="#01040c"/>
     </linearGradient>
