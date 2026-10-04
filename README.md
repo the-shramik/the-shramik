@@ -3,7 +3,7 @@
 <img src="./assets/header.svg?v=3" width="100%" alt="Field notes of Shramik Masti, Java developer at Telusko. I build backends with Spring Boot, and lately AI agents that actually make it to production."/>
 
 <sub>
-<a href="https://www.linkedin.com/in/shramik-masti-5bb3a1212/">LinkedIn</a> &nbsp;·&nbsp;
+<a href="https://www.linkedin.com/in/shramik-masti/">LinkedIn</a> &nbsp;·&nbsp;
 <a href="mailto:shramik0076@gmail.com">shramik0076@gmail.com</a> &nbsp;·&nbsp;
 <a href="https://stackoverflow.com/users/20370773/shramik-masti?tab=profile">Stack Overflow</a> &nbsp;·&nbsp;
 <a href="https://www.instagram.com/http._shramik/">Instagram</a>
