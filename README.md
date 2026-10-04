@@ -38,7 +38,7 @@ Away from the keyboard you'll usually find me on a hiking trail or trying out a 
 - Worked with Spring Boot, Spring Data JPA, Spring Security and REST APIs
 - Moved file and image storage to **Amazon S3**, which made the apps easier to scale and cut image processing time
 
-<sub>MCA, D.Y. Patil Agriculture &amp; Technical University (2023 onwards) &nbsp;·&nbsp; BSc Computer Science, Dr. Ghali College (2020 to 2023) &nbsp;·&nbsp; Certified in Spring &amp; Microservices and as an Industry Ready Java Spring Developer &nbsp;·&nbsp; Attended a Google Developer event in Pune</sub>
+<sub>MCA, D.Y. Patil Agriculture &amp; Technical University (2023 to 2025) &nbsp;·&nbsp; BSc Computer Science, Dr. Ghali College (2020 to 2023) &nbsp;·&nbsp; Certified in Spring &amp; Microservices and as an Industry Ready Java Spring Developer &nbsp;·&nbsp; Attended a Google Developer event in Pune</sub>
 
 <img src="./assets/divider.svg?v=3" width="100%" alt=""/>
 
