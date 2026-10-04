@@ -374,22 +374,91 @@ NAVI_DOTS = [(-14, -14, 2.4, "#5ef2ff", 2.6, 0), (-6, -20, 1.8, "#7cffcb", 3, 1)
              (-12, 14, 2, "#5ef2ff", 2.4, 1.2), (0, 18, 2.2, "#7cffcb", 3, .4), (12, 14, 2, "#5ef2ff", 2.6, 2)]
 
 
+# Original illustration of Jake Sully in his Na'vi form, drawn as a side-profile bust facing right.
+NAVI_BODY = ("M150 58 C185 55 215 70 232 100 C238 110 240 118 238 126 C246 140 256 160 262 172 "
+             "C265 178 262 184 254 185 C252 190 254 194 252 198 C248 200 246 201 247 204 "
+             "C250 207 250 212 245 216 C246 224 242 232 232 236 C220 240 205 240 196 246 "
+             "C192 270 196 290 206 306 C240 318 290 330 318 356 L326 380 L34 380 "
+             "C40 352 70 330 112 316 C126 290 128 250 122 210 C108 180 98 150 100 120 "
+             "C104 86 122 62 150 58 Z")
+NAVI_FRONT_RIM = ("M150 58 C185 55 215 70 232 100 C238 110 240 118 238 126 C246 140 256 160 262 172 "
+                  "C265 178 262 184 254 185 C252 190 254 194 252 198 C248 200 246 201 247 204 "
+                  "C250 207 250 212 245 216 C246 224 242 232 232 236 C220 240 205 240 196 246 "
+                  "C192 270 196 290 206 306 C240 318 290 330 318 356")
+NAVI_HAIR = ("M232 98 C214 64 180 50 146 54 C116 58 96 84 94 120 C92 150 100 176 112 204 "
+             "C116 186 112 160 114 140 C118 112 132 88 156 78 C186 68 214 78 232 98 Z")
+NAVI_EAR = "M150 142 C134 116 122 80 114 36 C142 64 166 100 174 132 C170 146 158 148 150 142 Z"
+NAVI_STRIPES = [
+    "M196 72 C204 82 206 92 202 100", "M178 66 C186 78 188 90 184 98", "M214 84 C220 92 222 100 218 106",
+    "M240 140 C234 146 232 152 234 158", "M206 150 C214 160 216 170 212 178", "M190 160 C196 170 198 180 194 188",
+    "M150 214 C160 222 164 232 162 242", "M148 250 C160 258 164 268 162 278", "M150 286 C162 294 168 302 166 310",
+]
+NAVI_DOTS2 = [(244, 136, 1.8), (249, 146, 1.6), (253, 156, 1.6), (256, 165, 1.4), (226, 104, 1.6), (216, 96, 1.4),
+              (205, 90, 1.6), (218, 168, 1.8), (210, 178, 1.5), (224, 186, 1.4), (200, 196, 1.6),
+              (176, 230, 1.6), (172, 262, 1.6), (178, 296, 1.8), (232, 320, 1.6), (262, 334, 1.8)]
+
+
+def navi_portrait(rnd):
+    braids = []
+    for i, (x0, x1, sway) in enumerate([(106, 66, 10), (112, 84, -8), (100, 52, 6)]):
+        braids.append(f'<path class="hairsway" d="M{x0} 150 C{x0 - 20 + sway} 220 {x1 + sway} 280 {x1} 380" '
+                      f'stroke="#081428" stroke-width="{7 - i * 1.5}" fill="none" stroke-linecap="round" '
+                      f'style="animation-delay:-{i * 1.3:.1f}s"/>')
+    beads = "".join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{c}"/>' for x, y, r, c in [
+        (88, 238, 3.2, "#f59e0b"), (78, 268, 3, "#5ef2ff"), (72, 300, 3.2, "#e11d48"), (98, 252, 2.6, "#f8fafc")])
+    stripes = "".join(f'<path d="{d}" stroke="#0a1730" stroke-width="3.2" fill="none" stroke-linecap="round" opacity=".55"/>'
+                      for d in NAVI_STRIPES)
+    dots = "".join(f'<circle class="pulse" cx="{x}" cy="{y}" r="{r}" fill="{"#7cffcb" if i % 4 == 0 else "#5ef2ff"}" '
+                   f'filter="url(#glow)" style="--t:{rnd.uniform(2, 4):.1f}s;animation-delay:-{rnd.uniform(0, 4):.1f}s"/>'
+                   for i, (x, y, r) in enumerate(NAVI_DOTS2))
+    necklace = "".join(f'<circle cx="{150 + i * 20}" cy="{322 + (i * 20 - 70) ** 2 / 520:.0f}" r="{4 if i % 2 else 3}" '
+                       f'fill="{"#f59e0b" if i % 3 == 0 else "#5ef2ff" if i % 3 == 1 else "#f8fafc"}"/>' for i in range(8))
+    return f"""
+      <circle cx="190" cy="170" r="150" fill="url(#halo)"/>
+      <circle cx="190" cy="170" r="162" fill="none" stroke="#5ef2ff" stroke-opacity=".25" stroke-dasharray="2 7" class="spin"/>
+      <circle cx="190" cy="170" r="176" fill="none" stroke="#c084fc" stroke-opacity=".18" stroke-dasharray="14 10" class="spinr"/>
+      <path d="M58 120 Q-4 250 66 386" stroke="#c084fc" stroke-width="3" fill="none" opacity=".75"/>
+      <path d="M58 120 L66 386" stroke="#e9d5ff" stroke-width=".8" opacity=".5"/>
+      {"".join(braids)}
+      {beads}
+      <path d="{NAVI_BODY}" fill="url(#skin)"/>
+      {stripes}
+      <path d="{NAVI_HAIR}" fill="#081428"/>
+      <path d="M150 62 C126 70 110 92 106 120" stroke="#1e3a5f" stroke-width="1.5" fill="none"/>
+      <path d="{NAVI_EAR}" fill="url(#skin)" stroke="#5ef2ff" stroke-opacity=".45" stroke-width="1.2"/>
+      <path d="M154 134 C142 114 132 86 126 58" stroke="#0a1730" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".6"/>
+      <path class="rim" d="{NAVI_FRONT_RIM}" stroke="#5ef2ff" stroke-width="2" fill="none" filter="url(#glow)"/>
+      <path d="M204 118 C214 112 228 112 238 118" stroke="#0a1730" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M208 128 C216 120 228 119 236 124 C230 132 218 134 208 128 Z" fill="#06101f"/>
+      <circle class="eye" cx="226" cy="126" r="4.2" fill="#fcd34d" filter="url(#glow)"/>
+      <circle cx="227" cy="125" r="1.4" fill="#06101f"/>
+      <path d="M249 186 C245 184 243 180 246 177" stroke="#0a1730" stroke-width="1.8" fill="none"/>
+      {dots}
+      <path d="M144 318 Q220 352 300 336" stroke="#c2410c" stroke-width="1.5" fill="none"/>
+      {necklace}
+    """
+
+
 # ───────────────────────────── HERO (Jake Sully) ─────────────────────────────
 def hero():
     rnd = random.Random(11)
-    W, H = 1200, 380
-    dots = "".join(f'<circle class="pulse" cx="{dx}" cy="{dy}" r="{r}" fill="{c}" style="--t:{t}s;animation-delay:-{d}s"/>'
-                   for dx, dy, r, c, t, d in NAVI_DOTS)
-    left = "".join(f'<path class="strand" d="{d}" stroke="#5ef2ff" stroke-width="2" fill="none" opacity=".8"/>'
-                   for d in braid(150, 330, 190))
-    right = "".join(f'<path class="strand" d="{d}" stroke="#c084fc" stroke-width="2" fill="none" opacity=".8" '
-                    f'style="animation-direction:reverse"/>' for d in braid(410, 580, 190))
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="The hero I follow: Jake Sully, Toruk Makto">
+    W, H = 1200, 420
+    left = "".join(f'<path class="strand" d="{d}" stroke="#5ef2ff" stroke-width="1.6" fill="none" opacity=".8"/>'
+                   for d in braid(610, 740, 352, amp=5, waves=5))
+    right = "".join(f'<path class="strand" d="{d}" stroke="#c084fc" stroke-width="1.6" fill="none" opacity=".8" '
+                    f'style="animation-direction:reverse"/>' for d in braid(800, 930, 352, amp=5, waves=5))
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="The hero I follow: Jake Sully, Toruk Makto. Original illustration of Jake in his Na'vi form.">
   <title>The Hero I Follow · Jake Sully</title>
   <defs>
     <linearGradient id="hbg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#030b1a"/><stop offset=".6" stop-color="#06182e"/><stop offset="1" stop-color="#0d1033"/>
     </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d4e89"/><stop offset=".55" stop-color="#16467a"/><stop offset="1" stop-color="#0c2a52"/>
+    </linearGradient>
+    <radialGradient id="halo" cx=".55" cy=".45" r=".6">
+      <stop offset="0" stop-color="#0ea5b7" stop-opacity=".45"/><stop offset=".7" stop-color="#0e7490" stop-opacity=".12"/><stop offset="1" stop-color="#0e7490" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="jake" x1="0" y1="0" x2="1" y2="0" spreadMethod="reflect">
       <stop offset="0" stop-color="#5ef2ff"/><stop offset=".5" stop-color="#e0fbff"/><stop offset="1" stop-color="#c084fc"/>
       <animateTransform attributeName="gradientTransform" type="translate" values="-0.5 0;0.5 0;-0.5 0" dur="10s" repeatCount="indefinite"/>
@@ -402,61 +471,53 @@ def hero():
     @keyframes flow{{to{{stroke-dashoffset:-28}}}}
     .tend{{animation:reach 3s ease-in-out infinite;}}
     @keyframes reach{{0%,100%{{opacity:.4}}50%{{opacity:1}}}}
-    .bond{{animation:bond 3s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}}
-    @keyframes bond{{0%,100%{{opacity:.25;transform:scale(.7)}}50%{{opacity:.9;transform:scale(1.5)}}}}
-    .spin{{animation:spin 30s linear infinite;transform-box:fill-box;transform-origin:center;}}
+    .spin{{animation:spin 40s linear infinite;transform-box:fill-box;transform-origin:center;}}
     @keyframes spin{{to{{transform:rotate(360deg)}}}}
-    .spinr{{animation:spin 45s linear infinite reverse;transform-box:fill-box;transform-origin:center;}}
+    .spinr{{animation:spin 60s linear infinite reverse;transform-box:fill-box;transform-origin:center;}}
+    .rim{{animation:rim 4s ease-in-out infinite;}}
+    @keyframes rim{{0%,100%{{opacity:.45}}50%{{opacity:1}}}}
+    .eye{{animation:eye 6s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}}
+    @keyframes eye{{0%,46%,54%,100%{{transform:scaleY(1)}}50%{{transform:scaleY(.1)}}}}
+    .hairsway{{animation:hair 6s ease-in-out infinite;transform-box:fill-box;transform-origin:top center;}}
+    @keyframes hair{{0%,100%{{transform:rotate(-1.5deg)}}50%{{transform:rotate(1.5deg)}}}}
+    .breathe{{animation:breathe 7s ease-in-out infinite;}}
+    @keyframes breathe{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-4px)}}}}
   </style>
   <g clip-path="url(#frame)">
     <rect width="{W}" height="{H}" fill="url(#hbg)"/>
-    <ellipse cx="370" cy="190" rx="300" ry="120" fill="#0e7490" opacity=".22" filter="url(#blur40)"/>
-    <ellipse cx="920" cy="170" rx="300" ry="110" fill="#7c3aed" opacity=".16" filter="url(#blur40)"/>
-    {stars(rnd, 50, W, H)}
+    <ellipse cx="860" cy="170" rx="320" ry="120" fill="#7c3aed" opacity=".14" filter="url(#blur40)"/>
+    {stars(rnd, 55, W, H)}
 
-    <!-- Na'vi emblem -->
-    <g transform="translate(100 190)">
-      <circle r="48" fill="#04122a" stroke="#5ef2ff" stroke-opacity=".5"/>
-      <circle r="58" fill="none" stroke="#5ef2ff" stroke-opacity=".35" stroke-dasharray="2 6" class="spin"/>
-      <g filter="url(#glow)">
-        {dots}
-        <path d="M-10 -4 Q0 -10 10 -4 Q0 4 -10 -4 Z" fill="none" stroke="#e0fbff" stroke-width="1.4"/>
-        <circle cx="0" cy="-4" r="2.4" fill="#fcd34d"/>
-      </g>
-      <text y="84" text-anchor="middle" font-family="{FONT}" font-size="12" letter-spacing="4" fill="#7dd3fc">NA'VI</text>
-    </g>
-
-    <!-- the queue braids and the bond -->
-    {left}
-    {right}
-    {tendrils(330, 190, 1, "#bff7ff")}
-    {tendrils(410, 190, -1, "#e9d5ff")}
-    <circle class="bond" cx="370" cy="190" r="14" fill="#5ef2ff" filter="url(#softglow)"/>
-    <circle cx="370" cy="190" r="4" fill="#fff" filter="url(#glow)"/>
-    <circle r="3.5" fill="#fff" filter="url(#glow)"><animateMotion dur="2.6s" repeatCount="indefinite" path="M150 190 L590 190"/></circle>
-    <circle r="3" fill="#f0abfc" filter="url(#glow)"><animateMotion dur="2.6s" begin="-1.3s" repeatCount="indefinite" path="M590 190 L150 190"/></circle>
-    <text x="370" y="274" text-anchor="middle" font-family="{FONT}" font-size="12" letter-spacing="5" fill="#94c9e0">TSAHEYLU  ·  THE BOND</text>
-
-    <!-- code emblem -->
-    <g transform="translate(640 190)">
-      <circle r="48" fill="#04122a" stroke="#c084fc" stroke-opacity=".55"/>
-      <circle r="58" fill="none" stroke="#c084fc" stroke-opacity=".4" stroke-dasharray="10 6" class="spinr"/>
-      <text y="9" text-anchor="middle" font-family="Consolas,'Fira Code',monospace" font-size="28" font-weight="700" fill="#e9d5ff" filter="url(#glow)">&lt;/&gt;</text>
-      <text y="84" text-anchor="middle" font-family="{FONT}" font-size="12" letter-spacing="4" fill="#d8b4fe">CODE</text>
-    </g>
+    <!-- Jake Sully, Na'vi form (original illustration) -->
+    <g transform="translate(60 34)"><g class="breathe">{navi_portrait(rnd)}</g></g>
+    {seeds(rnd, 8, 460, 420, 420)}
 
     <!-- text -->
     <g font-family="{FONT}">
-      <text x="755" y="112" font-size="13" letter-spacing="6" fill="#7dd3fc">THE HERO I FOLLOW</text>
-      <text x="753" y="168" font-size="52" font-weight="800" letter-spacing="5" fill="#5ef2ff" opacity=".3" filter="url(#softglow)">JAKE SULLY</text>
-      <text x="753" y="168" font-size="52" font-weight="800" letter-spacing="5" fill="url(#jake)">JAKE SULLY</text>
-      <text x="755" y="200" font-size="15" font-weight="600" letter-spacing="1.5" fill="#e9d5ff">Toruk Makto  ·  Olo'eyktan of the Omatikaya</text>
-      <path d="M755 222 H1150" stroke="#5ef2ff" stroke-opacity=".25"/>
-      <text x="755" y="254" font-size="16" font-style="italic" fill="#e0f2fe">"Sometimes your whole life boils down</text>
-      <text x="755" y="278" font-size="16" font-style="italic" fill="#e0f2fe">to one insane move."</text>
-      <text x="755" y="312" font-size="13" letter-spacing=".5" fill="#94c9e0">He arrived knowing nothing and learned a whole world.</text>
-      <text x="755" y="332" font-size="13" letter-spacing=".5" fill="#94c9e0">That is how I approach every new stack.</text>
+      <text x="512" y="92" font-size="13" letter-spacing="6" fill="#7dd3fc">THE HERO I FOLLOW</text>
+      <text x="508" y="158" font-size="66" font-weight="800" letter-spacing="6" fill="#5ef2ff" opacity=".3" filter="url(#softglow)">JAKE SULLY</text>
+      <text x="508" y="158" font-size="66" font-weight="800" letter-spacing="6" fill="url(#jake)">JAKE SULLY</text>
+      <text x="512" y="194" font-size="16" font-weight="600" letter-spacing="1.5" fill="#e9d5ff">Toruk Makto  ·  Olo'eyktan of the Omatikaya</text>
+      <path d="M512 216 H1150" stroke="#5ef2ff" stroke-opacity=".25"/>
+      <text x="512" y="252" font-size="19" font-style="italic" fill="#e0f2fe">"Sometimes your whole life boils down to one insane move."</text>
+      <text x="512" y="286" font-size="14" letter-spacing=".5" fill="#94c9e0">He arrived knowing nothing and learned a whole world. That is how I approach every new stack.</text>
     </g>
+
+    <!-- tsaheylu: Na'vi and code, bonded -->
+    <g transform="translate(560 352)">
+      <circle r="20" fill="#04122a" stroke="#5ef2ff" stroke-opacity=".6"/>
+      <circle r="8" fill="url(#seedg)"/><circle r="2" fill="#fff"/>
+    </g>
+    {left}{right}
+    {tendrils(740, 352, 1, "#bff7ff")}
+    {tendrils(800, 352, -1, "#e9d5ff")}
+    <circle r="3" fill="#fff" filter="url(#glow)"><animateMotion dur="2.4s" repeatCount="indefinite" path="M580 352 L960 352"/></circle>
+    <g transform="translate(980 352)">
+      <circle r="20" fill="#04122a" stroke="#c084fc" stroke-opacity=".6"/>
+      <text y="5" text-anchor="middle" font-family="Consolas,'Fira Code',monospace" font-size="13" font-weight="700" fill="#e9d5ff">&lt;/&gt;</text>
+    </g>
+    <text x="1020" y="348" font-family="{FONT}" font-size="11" letter-spacing="3" fill="#94c9e0">TSAHEYLU</text>
+    <text x="1020" y="364" font-family="{FONT}" font-size="11" letter-spacing="1" fill="#64748b">Na'vi meets code</text>
   </g>
   <rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="18" fill="none" stroke="#5ef2ff" stroke-opacity=".18"/>
 </svg>"""

@@ -69,7 +69,7 @@ off_duty:   Hiking trails ⛰️ and new coffee blends ☕
 
 ## 🐉 The Hero I Follow
 
-<img src="./assets/hero.svg" width="100%" alt="The hero I follow: Jake Sully, Toruk Makto. Sometimes your whole life boils down to one insane move."/>
+<img src="./assets/hero.svg" width="100%" alt="Original illustration of Jake Sully in his Na'vi form. The hero I follow: Toruk Makto. Sometimes your whole life boils down to one insane move."/>
 
 Jake Sully landed on Pandora as an outsider who knew nothing about that world. He ended up as Toruk Makto, and later as the leader of the Omatikaya. I don't follow him because he wins every fight. I follow him for the way he gets there, and I try to bring the same habits to my own work.
 
