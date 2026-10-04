@@ -1,141 +1,89 @@
 <div align="center">
 
-<img src="./assets/header.svg" width="100%" alt="Shramik Masti · Java Developer at Telusko · Spring AI · Agentic AI"/>
+<img src="./assets/header.svg" width="100%" alt="Field notes of Shramik Masti, Java developer at Telusko. I build backends with Spring Boot, and lately AI agents that actually make it to production."/>
 
-<a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=500&size=20&duration=3200&pause=900&color=5EF2FF&center=true&vCenter=true&width=680&lines=Java+Developer+%40+Telusko;Spring+Boot+%E2%80%A2+Microservices+%E2%80%A2+Spring+AI;Building+agentic+apps+with+LangChain+%26+LangGraph;From+an+LMS+to+an+AI+Tutor%2C+shipped+to+production" alt="Typing intro"/></a>
-
-<br/>
-
-<a href="https://www.linkedin.com/in/shramik-masti-5bb3a1212/"><img src="https://img.shields.io/badge/LinkedIn-04122A?style=for-the-badge&logo=linkedin&logoColor=5EF2FF" alt="LinkedIn"/></a>
-<a href="mailto:shramik0076@gmail.com"><img src="https://img.shields.io/badge/Email-04122A?style=for-the-badge&logo=gmail&logoColor=5EF2FF" alt="Email"/></a>
-<a href="https://stackoverflow.com/users/20370773/shramik-masti?tab=profile"><img src="https://img.shields.io/badge/Stack_Overflow-04122A?style=for-the-badge&logo=stackoverflow&logoColor=5EF2FF" alt="Stack Overflow"/></a>
-<a href="https://www.instagram.com/http._shramik/"><img src="https://img.shields.io/badge/Instagram-04122A?style=for-the-badge&logo=instagram&logoColor=C084FC" alt="Instagram"/></a>
+<sub>
+<a href="https://www.linkedin.com/in/shramik-masti-5bb3a1212/">LinkedIn</a> &nbsp;·&nbsp;
+<a href="mailto:shramik0076@gmail.com">shramik0076@gmail.com</a> &nbsp;·&nbsp;
+<a href="https://stackoverflow.com/users/20370773/shramik-masti?tab=profile">Stack Overflow</a> &nbsp;·&nbsp;
+<a href="https://www.instagram.com/http._shramik/">Instagram</a>
+</sub>
 
 </div>
 
 <img src="./assets/divider.svg" width="100%" alt=""/>
 
-## 🌿 About Me
+### 01 &nbsp;Who I am
 
-I'm a **Backend Developer at [Telusko](https://telusko.com)** who builds scalable Spring Boot applications and AI powered systems. My foundation is Java and the Spring ecosystem, and these days I spend most of my time turning LLMs into reliable products with **Spring AI, LangChain and LangGraph**.
+Hi, I'm Shramik. I work as a **Java developer at [Telusko](https://telusko.com)**, mostly on backend work in Spring Boot. Over the last year that work has moved closer to AI: I built an AI tutor for our learning platform with **Spring AI**, and now I spend a lot of time on agentic apps with **LangChain and LangGraph**.
 
-```yaml
-name:       Shramik Masti
-role:       Java Developer @ Telusko
-based_in:   Maharashtra, India
-core:       [Java, Spring Boot, Spring Security, Spring Data JPA, Microservices, REST APIs]
-ai_stack:   [Spring AI, LangChain, LangGraph, LangChain4j, MCP]
-learning:   System Design, architecting efficient backend systems
-open_to:    [Open Source, Enterprise Application Development]
-off_duty:   Hiking trails ⛰️ and new coffee blends ☕
-```
+I like the boring parts of shipping: secure APIs, clean data models, payments that don't break, and code someone else can read six months later. Right now I'm learning **system design** properly, so the systems I build hold up as they grow.
+
+Away from the keyboard you'll usually find me on a hiking trail or trying out a new coffee.
 
 <img src="./assets/divider.svg" width="100%" alt=""/>
 
-## 🪶 My Journey
+### 02 &nbsp;The trail so far
 
-<img src="./assets/journey.svg" width="100%" alt="2020 BSc Computer Science, 2023 MCA, April 2024 Java Developer Intern at Code Crafter Services, March 2025 Java Developer at Telusko, now Agentic AI Engineering"/>
+<img src="./assets/journey.svg" width="100%" alt="The trail so far: BSc Computer Science 2020, MCA 2023, Java Developer Intern at Code Crafter Services in April 2024, Java Developer at Telusko in March 2025, and now agentic AI."/>
 
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### 💠 Java Developer · Telusko
-<sub>March 2025 · Present</sub>
-
-- Built a **Learning Management System** on Spring Boot with secure APIs and user management
+**Java Developer, Telusko** &nbsp;<sub>March 2025 to now</sub>
+- Built the backend of our **Learning Management System** in Spring Boot, including secure APIs and user management
 - Integrated **payments** for course purchases
-- Built an **AI Tutor** with Spring AI that gives adaptive responses and evaluates learners
+- Built an **AI Tutor** on Spring AI that adapts its answers and evaluates learners
 - Building **agentic applications** with LangChain and LangGraph
 
-</td>
-<td width="50%" valign="top">
+**Java Developer Intern, Code Crafter Services** &nbsp;<sub>April 2024 to February 2025</sub>
+- Wrote backends for a café POS, inventory, e-commerce, GST and task management systems
+- Worked with Spring Boot, Spring Data JPA, Spring Security and REST APIs
+- Moved file and image storage to **Amazon S3**, which made the apps easier to scale and cut image processing time
 
-### 🔹 Java Developer Intern · Code Crafter Services
-<sub>April 2024 · February 2025</sub>
-
-- Backends for **POS (café), inventory, e-commerce, GST and task management** systems
-- Spring Boot, Spring Data JPA, Spring Security and REST APIs
-- Moved file and image storage to **Amazon S3**, improving scalability and cutting processing time
-
-</td>
-</tr>
-</table>
-
-<sub>🎓 **MCA**, D.Y. Patil Agriculture &amp; Technical University (2023 onwards) &nbsp;·&nbsp; **BSc Computer Science**, Dr. Ghali College (2020 to 2023)</sub><br/>
-<sub>📜 Spring &amp; Microservices · Industry Ready Java Spring Developer &nbsp;·&nbsp; 🎤 Attended Google Developer Event, Pune</sub>
+<sub>MCA, D.Y. Patil Agriculture &amp; Technical University (2023 onwards) &nbsp;·&nbsp; BSc Computer Science, Dr. Ghali College (2020 to 2023) &nbsp;·&nbsp; Certified in Spring &amp; Microservices and as an Industry Ready Java Spring Developer &nbsp;·&nbsp; Attended a Google Developer event in Pune</sub>
 
 <img src="./assets/divider.svg" width="100%" alt=""/>
 
-## 🐉 The Hero I Follow
+### 03 &nbsp;The one I follow
 
-<img src="./assets/hero.svg" width="100%" alt="Original illustration of Jake Sully in his Na'vi form. The hero I follow: Toruk Makto. Sometimes your whole life boils down to one insane move."/>
+<img src="./assets/hero.svg" width="100%" alt="The one I follow: Jake Sully, Toruk Makto. A hand-drawn sketch of Jake in his Na'vi form, with the quote: Sometimes your whole life boils down to one insane move."/>
 
-Jake Sully landed on Pandora as an outsider who knew nothing about that world. He ended up as Toruk Makto, and later as the leader of the Omatikaya. I don't follow him because he wins every fight. I follow him for the way he gets there, and I try to bring the same habits to my own work.
+Jake Sully landed on Pandora as an outsider who knew nothing about that world. He ended up as Toruk Makto, and later as the leader of the Omatikaya. I don't follow him because he wins every fight. I follow him for the way he gets there. These are the habits I've borrowed from him:
 
-| | What Jake does | How I carry it into my work |
-|:-:|---|---|
-| 🌱 | **Learns from zero.** He arrives with no idea how Pandora works and learns everything from Neytiri, one fall at a time. | Every new stack is my Pandora. I went from Java basics to Spring Boot, and then to Spring AI, LangGraph and MCP, by being a beginner again each time. |
-| 👁️ | **"I See You."** For the Na'vi, seeing means understanding someone, which goes deeper than looking at them. | Before I write code, I try to understand the user and the real problem behind the ticket. |
-| 🔗 | **Tsaheylu, the bond.** He earns his ikran's trust, and that trust runs both ways. | I build that bond between Java backends and AI models, and with the teammates I build alongside. |
-| 🐉 | **Toruk Makto.** He takes on the challenge nobody else dares to try. | When a problem looks impossible, I want to be the one who picks it up. Today that means agentic AI in production. |
-| 🛡️ | **Protects his family.** In *The Way of Water* he puts his family and his people first. | I take ownership of what I ship, from security and tests to the stability of production. |
+1. **He starts from zero.** He knew nothing about Pandora and learned it from Neytiri, one fall at a time. Every new stack is my Pandora. I went from Java basics to Spring Boot, then to Spring AI, LangGraph and MCP, by being a beginner again each time.
+2. **"I See You."** For the Na'vi, seeing someone means understanding them, which goes deeper than looking. Before I write code, I try to understand the person using it and the real problem behind the ticket.
+3. **Tsaheylu, the bond.** He earns his ikran's trust, and that trust runs both ways. My work is building that kind of bond between Java backends and AI models, and with the people I build alongside.
+4. **Toruk Makto.** He takes on the challenge nobody else dares to try. When a problem looks impossible, I want to be the one who picks it up. Today that means getting agentic AI into production.
+5. **He protects his own.** In *The Way of Water* he puts his family and his people first. I take ownership of what I ship, from security and tests to keeping production stable.
 
 <img src="./assets/divider.svg" width="100%" alt=""/>
 
-## 🔷 Tech Stack
+### 04 &nbsp;What's in my pack
 
-<div align="center">
-
-<img src="https://skillicons.dev/icons?i=java,spring,python,js,html,css&theme=dark" alt="Languages and frameworks"/>
-<br/><br/>
-<img src="https://skillicons.dev/icons?i=mysql,docker,aws,gcp,git,github,postman,vscode&theme=dark" alt="Cloud and tools"/>
-
-<br/><br/>
-
-![Spring AI](https://img.shields.io/badge/Spring_AI-04122A?style=flat-square&logo=spring&logoColor=7CFFCB)
-![Spring Security](https://img.shields.io/badge/Spring_Security-04122A?style=flat-square&logo=springsecurity&logoColor=7CFFCB)
-![OAuth2](https://img.shields.io/badge/OAuth2-04122A?style=flat-square&logo=auth0&logoColor=5EF2FF)
-![Microservices](https://img.shields.io/badge/Microservices-04122A?style=flat-square&logo=spring&logoColor=5EF2FF)
-![LangChain](https://img.shields.io/badge/LangChain-04122A?style=flat-square&logo=langchain&logoColor=5EF2FF)
-![LangGraph](https://img.shields.io/badge/LangGraph-04122A?style=flat-square&logo=langgraph&logoColor=C084FC)
-![LangChain4j](https://img.shields.io/badge/LangChain4j-04122A?style=flat-square&logo=openjdk&logoColor=5EF2FF)
-![MCP](https://img.shields.io/badge/MCP-04122A?style=flat-square&logo=anthropic&logoColor=C084FC)
-![Google ADK](https://img.shields.io/badge/Google_ADK-04122A?style=flat-square&logo=googlecloud&logoColor=5EF2FF)
-![Amazon S3](https://img.shields.io/badge/Amazon_S3-04122A?style=flat-square&logo=amazons3&logoColor=C084FC)
-
-</div>
+| | |
+|---|---|
+| **Every day** | Java, Spring Boot, Spring MVC, Spring Data JPA, Spring Security, OAuth2, REST APIs, SQL |
+| **AI work** | Spring AI, LangChain, LangGraph, LangChain4j, MCP, Google ADK |
+| **Ship & run** | Microservices, Spring Cloud, Docker, AWS (S3), Google Cloud, Git |
+| **On the side** | Python, NumPy, JavaScript |
 
 <img src="./assets/divider.svg" width="100%" alt=""/>
 
-## 🪐 Featured Projects
+### 05 &nbsp;Things I've built
 
-<div align="center">
-
-<a href="https://github.com/the-shramik/RealTime-InterviewBot"><img src="https://github-readme-stats.vercel.app/api/pin/?username=the-shramik&repo=RealTime-InterviewBot&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f" width="49%"/></a>
-<a href="https://github.com/the-shramik/Spring-AI-Agentic-Patterns"><img src="https://github-readme-stats.vercel.app/api/pin/?username=the-shramik&repo=Spring-AI-Agentic-Patterns&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f" width="49%"/></a>
-<a href="https://github.com/the-shramik/AI-Engineering-Project-Spring-AI-"><img src="https://github-readme-stats.vercel.app/api/pin/?username=the-shramik&repo=AI-Engineering-Project-Spring-AI-&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f" width="49%"/></a>
-<a href="https://github.com/the-shramik/payment-gateway-spring-boot"><img src="https://github-readme-stats.vercel.app/api/pin/?username=the-shramik&repo=payment-gateway-spring-boot&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f" width="49%"/></a>
-
-</div>
+- **[RealTime-InterviewBot](https://github.com/the-shramik/RealTime-InterviewBot)**: a voice mock-interview bot. Spring Boot streams audio over WebSockets to OpenAI's Realtime API and talks back.
+- **[AI-Engineering-Project-Spring-AI-](https://github.com/the-shramik/AI-Engineering-Project-Spring-AI-)**: an e-commerce backend built twice. The second version adds Spring AI with a vector store and a chatbot that knows the product catalogue.
+- **[payment-gateway-spring-boot](https://github.com/the-shramik/payment-gateway-spring-boot)**: Razorpay payments wired into Spring Boot, end to end.
+- **[LangChain4j-Demo](https://github.com/the-shramik/LangChain4j-Demo)**: LangChain4j in plain Java and inside a Spring Boot app.
+- **[ai-ml-journey](https://github.com/the-shramik/ai-ml-journey)**: my notebooks from learning AI and ML, starting with Python and NumPy.
 
 <img src="./assets/divider.svg" width="100%" alt=""/>
 
-## 📡 GitHub Activity
+### 06 &nbsp;Tracks
 
 <div align="center">
 
-<img src="https://github-readme-stats.vercel.app/api?username=the-shramik&show_icons=true&include_all_commits=true&count_private=true&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f&ring_color=5ef2ff" height="170" alt="GitHub stats"/>
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=the-shramik&layout=compact&langs_count=6&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&border_color=12324f" height="170" alt="Top languages"/>
+<img src="https://github-readme-stats.vercel.app/api?username=the-shramik&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=0e1517&title_color=7fd8c3&text_color=e9dfc7&icon_color=e3a857&ring_color=7fd8c3" height="165" alt="GitHub stats"/>
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=the-shramik&layout=compact&langs_count=6&hide_border=true&bg_color=0e1517&title_color=7fd8c3&text_color=e9dfc7" height="165" alt="Most used languages"/>
 
-<img src="https://streak-stats.demolab.com?user=the-shramik&background=04122A&border=12324F&stroke=12324F&ring=5EF2FF&fire=C084FC&currStreakNum=E0FBFF&sideNums=E0FBFF&currStreakLabel=5EF2FF&sideLabels=7DD3FC&dates=94C9E0" height="170" alt="GitHub streak"/>
-
-</div>
-
-<div align="center">
-
-<img src="./assets/footer.svg" width="100%" alt="Oel ngati kameie. I see you. Thanks for visiting!"/>
-
-<img src="https://komarev.com/ghpvc/?username=the-shramik&label=Visitors&color=0e7490&style=flat-square" alt="Profile views"/>
+<img src="./assets/footer.svg" width="100%" alt="Oel ngati kameie. I see you. Thanks for reading my field notes. Shramik"/>
 
 </div>

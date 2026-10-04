@@ -1,594 +1,502 @@
-"""Generate Pandora (Avatar) themed animated SVGs for the GitHub profile README."""
-import random, os, sys
+"""Generate the hand-drawn "Pandora field journal" SVGs for the GitHub profile README.
 
-OUT = sys.argv[1]
-os.makedirs(OUT, exist_ok=True)
-FONT = "'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif"
+Run from the repo root:  python assets/generate.py assets
+Fonts (OFL) live in assets/fonts and are subset + embedded into each SVG, because
+GitHub serves README images in a sandbox where external fonts never load.
+"""
+import base64, html, io, math, os, random, re, sys
 
-COMMON_STYLE = """
-  .twinkle{animation:twinkle var(--t,4s) ease-in-out infinite;}
-  @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:1}}
-  .pulse{animation:pulse var(--t,3s) ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
-  @keyframes pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
-  .seed{animation:rise var(--t,14s) linear infinite;opacity:0;transform-box:fill-box;}
-  @keyframes rise{
-    0%{transform:translate(0,0);opacity:0}
-    10%{opacity:1}
-    25%{transform:translate(var(--s,14px),-25%)}
-    50%{transform:translate(calc(var(--s,14px) * -1),-50%)}
-    75%{transform:translate(var(--s,14px),-75%)}
-    90%{opacity:.9}
-    100%{transform:translate(0,-100%);opacity:0}
-  }
-  .sway{animation:sway var(--t,6s) ease-in-out infinite;transform-box:fill-box;transform-origin:bottom center;}
-  @keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+from fontTools import subset
+
+OUT = sys.argv[1] if len(sys.argv) > 1 else "assets"
+FONT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
+FONT_FILES = {"Hand": "Caveat-SemiBold.ttf", "Serif": "Fraunces-Display.ttf", "SerifItalic": "Fraunces-Italic.ttf"}
+
+HAND, SERIF, SERIF_I = "'Hand',cursive", "'Serif',Georgia,serif", "'SerifItalic',Georgia,serif"
+BG, CARD = "#0e1517", "#131d1f"
+CREAM, DIM, FAINT = "#e9dfc7", "#9c9482", "#263335"
+TEAL, AMBER = "#7fd8c3", "#e3a857"
+
+
+# ───────────────────────────── shared pieces ─────────────────────────────
+def defs(extra=""):
+    return f"""<defs>
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="1" result="n">
+        <animate attributeName="seed" values="1;4;7;2" dur="0.8s" calcMode="discrete" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="wash" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="3" seed="8" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="46" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feGaussianBlur in="d" stdDeviation="2.5"/>
+    </filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 .91  0 0 0 0 .87  0 0 0 0 .78  0 0 0 .06 0"/>
+    </filter>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="dotgrid" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#1f2b2c"/></pattern>
+    <radialGradient id="vig" cx=".5" cy=".5" r=".75">
+      <stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/>
+    </radialGradient>
+    {extra}
+  </defs>"""
+
+
+STYLE = """
+  /*FONTS*/
+  .boil{filter:url(#rough);}
+  .pulse{animation:pulse var(--t,3s) ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  .bob{animation:bob var(--t,9s) ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .redraw{stroke-dasharray:var(--l);animation:redraw var(--t,9s) ease-in-out infinite;}
+  @keyframes redraw{0%,62%{stroke-dashoffset:0;opacity:1}68%{stroke-dashoffset:0;opacity:0}69%{stroke-dashoffset:var(--l);opacity:1}100%{stroke-dashoffset:0}}
+  .drift{animation:drift var(--t,26s) linear infinite;}
+  @keyframes drift{0%{transform:translate(0,0);opacity:0}8%{opacity:1}50%{transform:translate(var(--dx),-120px)}92%{opacity:1}100%{transform:translate(0,-240px);opacity:0}}
+  .blink{animation:blink 7s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
+  @keyframes blink{0%,45%,49%,100%{transform:scaleY(1)}47%{transform:scaleY(.08)}}
+  .sway{animation:sway 7s ease-in-out infinite;transform-box:fill-box;transform-origin:top center;}
+  @keyframes sway{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
+  .march{animation:march 2.2s linear infinite;}
+  @keyframes march{to{stroke-dashoffset:-24}}
   @media (prefers-reduced-motion: reduce){*{animation:none!important}}
 """
 
-DEFS_COMMON = """
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="3" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="softglow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="6" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="blur40" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="40"/></filter>
-    <radialGradient id="seedg">
-      <stop offset="0" stop-color="#ffffff"/>
-      <stop offset=".35" stop-color="#d6fbff"/>
-      <stop offset="1" stop-color="#5ef2ff" stop-opacity="0"/>
-    </radialGradient>
-"""
+
+def paper(W, H, rx=14):
+    return f"""<clipPath id="page"><rect width="{W}" height="{H}" rx="{rx}"/></clipPath>
+  <g clip-path="url(#page)">
+    <rect width="{W}" height="{H}" fill="{BG}"/>
+    <rect width="{W}" height="{H}" fill="url(#dotgrid)"/>
+    <rect width="{W}" height="{H}" filter="url(#grain)"/>
+    <rect width="{W}" height="{H}" fill="url(#vig)"/>"""
 
 
-def stars(rnd, n, w, h):
+def svg_open(W, H, label, title):
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
+            f'role="img" aria-label="{label}">\n  <title>{title}</title>')
+
+
+def tape(x, y, w, rot):
+    return (f'<rect x="{x - w / 2}" y="{y - 11}" width="{w}" height="22" fill="{CREAM}" opacity=".13" '
+            f'transform="rotate({rot} {x} {y})" filter="url(#wash)"/>'
+            f'<rect x="{x - w / 2}" y="{y - 11}" width="{w}" height="22" fill="{CREAM}" opacity=".08" '
+            f'transform="rotate({rot} {x} {y})"/>')
+
+
+def arrow(x1, y1, x2, y2, bend=30, color=DIM, width=1.6):
+    """A loose hand-drawn arrow with a slightly open head."""
+    mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+    dx, dy = x2 - x1, y2 - y1
+    n = math.hypot(dx, dy) or 1
+    cx, cy = mx - dy / n * bend, my + dx / n * bend
+    ang = math.atan2(y2 - cy, x2 - cx)
+    h1 = (x2 - 11 * math.cos(ang - .45), y2 - 11 * math.sin(ang - .45))
+    h2 = (x2 - 11 * math.cos(ang + .5), y2 - 11 * math.sin(ang + .5))
+    return (f'<path d="M{x1:.0f} {y1:.0f} Q{cx:.0f} {cy:.0f} {x2:.0f} {y2:.0f} M{h1[0]:.1f} {h1[1]:.1f} L{x2} {y2} '
+            f'L{h2[0]:.1f} {h2[1]:.1f}" stroke="{color}" stroke-width="{width}" fill="none" stroke-linecap="round" '
+            f'stroke-linejoin="round"/>')
+
+
+def swoosh(x1, x2, y, color=TEAL, t=9, delay=0, width=3):
+    """Hand-drawn underline that is periodically redrawn."""
+    L = int((x2 - x1) * 1.15)
+    q = (x2 - x1) / 4
+    return (f'<path class="redraw" d="M{x1} {y + 2} C{x1 + q} {y - 4} {x1 + 2 * q} {y + 5} {x1 + 3 * q} {y - 1} '
+            f'S{x2 - 10} {y - 3} {x2} {y + 1}" stroke="{color}" stroke-width="{width}" fill="none" '
+            f'stroke-linecap="round" style="--l:{L};--t:{t}s;animation-delay:-{delay}s"/>')
+
+
+def specks(rnd, n, W, H, avoid=None):
     out = []
     for _ in range(n):
-        x, y = rnd.uniform(0, w), rnd.uniform(0, h)
-        r = rnd.choice([.6, .8, 1, 1.2, 1.6])
-        t = rnd.uniform(2.5, 7)
-        d = rnd.uniform(0, 6)
-        out.append(f'<circle class="twinkle" cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="#dff8ff" '
-                   f'style="--t:{t:.1f}s;animation-delay:-{d:.1f}s"/>')
-    return "\n    ".join(out)
-
-
-def seeds(rnd, n, w, y0, travel):
-    """Atokirina (woodsprite seeds) drifting upward."""
-    out = []
-    for _ in range(n):
-        x = rnd.uniform(20, w - 20)
-        t = rnd.uniform(11, 22)
-        d = rnd.uniform(0, 22)
-        s = rnd.uniform(8, 26)
-        sc = rnd.uniform(.6, 1.15)
-        out.append(
-            f'<g transform="translate({x:.0f} {y0}) scale({sc:.2f})"><g class="seed" '
-            f'style="--t:{t:.1f}s;--s:{s:.0f}px;animation-delay:-{d:.1f}s">'
-            f'<rect x="-10" y="-{travel}" width="20" height="{travel}" fill="none"/>'
-            f'<circle r="9" fill="url(#seedg)" opacity=".55"/>'
-            f'<g stroke="#e8fdff" stroke-width=".7" stroke-linecap="round" opacity=".9">'
-            f'<path d="M0 0 C-4 -5 -7 -8 -9 -12"/><path d="M0 0 C4 -5 7 -8 9 -12"/>'
-            f'<path d="M0 0 C-1 -6 -1 -10 0 -14"/><path d="M0 0 C-6 -2 -9 -4 -12 -6"/>'
-            f'<path d="M0 0 C6 -2 9 -4 12 -6"/></g>'
-            f'<circle r="1.8" fill="#fff"/></g></g>')
-    return "\n    ".join(out)
-
-
-def mountain(x, y, s, t, delay, fill, rim, falls=True, rnd=None):
-    """A floating Hallelujah mountain: grassy crown, rocky body tapering to a point."""
-    vines = []
-    for vx, vl in [(-38, 40), (-18, 70), (12, 55), (34, 35)]:
-        vines.append(f'<path d="M{vx} 8 q4 {vl/2} -2 {vl}" stroke="#1f5c55" stroke-width="1.4" fill="none" opacity=".8"/>')
-    fall = ''
-    if falls:
-        fall = ('<path class="fall" d="M22 4 C24 40 22 90 25 150" stroke="url(#fallg)" '
-                'stroke-width="3" fill="none" stroke-dasharray="6 10"/>')
-    return f'''<g transform="translate({x} {y}) scale({s})">
-      <g class="float" style="--t:{t}s;animation-delay:-{delay}s">
-        {fall}
-        <path d="M-62 0 C-55 -18 -38 -30 -14 -34 C8 -38 40 -30 62 -6 C66 4 58 10 50 18 C40 40 28 72 12 112 C6 126 -2 128 -6 112 C-16 76 -30 44 -48 22 C-58 14 -66 8 -62 0 Z" fill="{fill}"/>
-        <path d="M-62 0 C-55 -18 -38 -30 -14 -34 C8 -38 40 -30 62 -6" stroke="{rim}" stroke-width="2" fill="none" opacity=".75"/>
-        <path d="M-58 -8 q6 -14 14 -6 q5 -16 15 -8 q6 -14 16 -4 q8 -12 16 -2 q8 -10 15 0 q8 -8 14 4 q4 6 0 10 L-58 4 Z" fill="#0d3b3a"/>
-        <g class="pulse" style="--t:3.4s;animation-delay:-{delay}s">
-          <circle cx="-30" cy="-12" r="2" fill="#5ef2ff" filter="url(#glow)"/>
-          <circle cx="8" cy="-16" r="1.6" fill="#c084fc" filter="url(#glow)"/>
-          <circle cx="36" cy="-8" r="1.8" fill="#5ef2ff" filter="url(#glow)"/>
-        </g>
-        {''.join(vines)}
-      </g>
-    </g>'''
-
-
-def plant(x, base, h, color, rnd):
-    """A bioluminescent frond with glowing pods."""
-    lean = rnd.uniform(-25, 25)
-    t = rnd.uniform(4, 8)
-    d = rnd.uniform(0, 8)
-    pods = []
-    for i in range(rnd.randint(2, 4)):
-        f = rnd.uniform(.35, .95)
-        px = x + lean * f * f
-        py = base - h * f
-        pods.append(f'<circle class="pulse" cx="{px:.1f}" cy="{py:.1f}" r="{rnd.uniform(1.5, 3.2):.1f}" '
-                    f'fill="{color}" filter="url(#glow)" style="--t:{rnd.uniform(2, 4.5):.1f}s;animation-delay:-{rnd.uniform(0, 4):.1f}s"/>')
-    return (f'<g class="sway" style="--t:{t:.1f}s;animation-delay:-{d:.1f}s">'
-            f'<path d="M{x:.0f} {base} Q{x + lean * .2:.0f} {base - h * .5:.0f} {x + lean:.0f} {base - h:.0f}" '
-            f'stroke="{color}" stroke-opacity=".55" stroke-width="2" fill="none" stroke-linecap="round"/>'
-            f'{"".join(pods)}</g>')
-
-
-def forest(rnd, w, base, n, maxh):
-    colors = ["#5ef2ff", "#5ef2ff", "#38bdf8", "#c084fc", "#e879f9", "#7cffcb"]
-    out = []
-    for _ in range(n):
-        out.append(plant(rnd.uniform(0, w), base, rnd.uniform(maxh * .35, maxh), rnd.choice(colors), rnd))
-    return "\n    ".join(out)
-
-
-def ground(w, h, top, rnd, fill="#020a14"):
-    pts = [f"M0 {h}", f"L0 {top}"]
-    x = 0
-    while x < w:
-        nx = x + rnd.uniform(40, 90)
-        pts.append(f"Q{(x + nx) / 2:.0f} {top - rnd.uniform(4, 22):.0f} {nx:.0f} {top + rnd.uniform(-4, 6):.0f}")
-        x = nx
-    pts.append(f"L{w} {h} Z")
-    return f'<path d="{" ".join(pts)}" fill="{fill}"/>'
-
-
-# An ikran (mountain banshee) seen from below, flapping while it flies along a motion path.
-IKRAN = """<g opacity=".9"><g>
-      <animateMotion dur="{dur}s" begin="{begin}s" repeatCount="indefinite" rotate="auto" path="{path}"/>
-      <g transform="scale({sc})">
-        <g><animateTransform attributeName="transform" type="scale" values="1 1;1 .25;1 1" dur="1.1s" repeatCount="indefinite"/>
-          <path d="M-6 -2 C-10 -22 -2 -40 14 -50 C8 -32 10 -16 12 -2 Z" fill="#0b1a2e" stroke="#5ef2ff" stroke-opacity=".7" stroke-width="1"/>
-          <path d="M-6 2 C-10 22 -2 40 14 50 C8 32 10 16 12 2 Z" fill="#0b1a2e" stroke="#5ef2ff" stroke-opacity=".7" stroke-width="1"/>
-          <path d="M0 -10 C2 -24 6 -34 12 -42 M0 10 C2 24 6 34 12 42" stroke="#c084fc" stroke-width="1" fill="none" opacity=".8"/>
-        </g>
-        <path d="M-26 0 C-12 -5 12 -5 26 0 C12 5 -12 5 -26 0 Z" fill="#0b1a2e" stroke="#5ef2ff" stroke-opacity=".8" stroke-width="1"/>
-        <path d="M26 0 L40 -3 L35 0 L40 3 Z M-26 0 L-42 -5 L-37 0 L-42 5 Z" fill="#5ef2ff" opacity=".85"/>
-        <circle cx="30" cy="0" r="1.6" fill="#e879f9" filter="url(#glow)"/>
-      </g>
-    </g></g>"""
-
-
-# ───────────────────────────── HEADER ─────────────────────────────
-def header():
-    rnd = random.Random(7)
-    W, H = 1200, 440
-    mountains = "\n    ".join([
-        mountain(150, 150, .75, 9, 1, "#0a1d33", "#1e6f8a", True),
-        mountain(330, 95, .45, 11, 4, "#0b1a2e", "#18506a", False),
-        mountain(880, 105, .5, 10, 2, "#0b1a2e", "#18506a", False),
-        mountain(1040, 175, .9, 8, 0, "#0a1d33", "#1e6f8a", True),
-        mountain(60, 300, .38, 12, 6, "#081626", "#16455c", False),
-        mountain(1160, 70, .32, 13, 3, "#081626", "#16455c", False),
-    ])
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="Shramik Masti, Java Developer and Agentic AI Engineer">
-  <title>Shramik Masti · Java Developer &amp; Agentic AI Engineer</title>
-  <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#01040c"/>
-      <stop offset=".55" stop-color="#04122a"/>
-      <stop offset="1" stop-color="#062033"/>
-    </linearGradient>
-    <linearGradient id="namegrad" x1="0" y1="0" x2="1" y2="0" spreadMethod="reflect">
-      <stop offset="0" stop-color="#5ef2ff"/>
-      <stop offset=".5" stop-color="#e0fbff"/>
-      <stop offset="1" stop-color="#c084fc"/>
-      <animateTransform attributeName="gradientTransform" type="translate" values="-0.5 0;0.5 0;-0.5 0" dur="12s" repeatCount="indefinite"/>
-    </linearGradient>
-    <linearGradient id="fallg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#bff7ff" stop-opacity=".9"/>
-      <stop offset="1" stop-color="#5ef2ff" stop-opacity="0"/>
-    </linearGradient>
-    <radialGradient id="planet" cx=".35" cy=".35" r=".8">
-      <stop offset="0" stop-color="#9fd8ff"/>
-      <stop offset=".6" stop-color="#3b6fa8"/>
-      <stop offset="1" stop-color="#0d2547"/>
-    </radialGradient>
-    <radialGradient id="vignette" cx=".5" cy=".5" r=".55">
-      <stop offset="0" stop-color="#01040c" stop-opacity=".75"/>
-      <stop offset="1" stop-color="#01040c" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="shootg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#5ef2ff" stop-opacity="0"/></linearGradient>
-    <clipPath id="planetclip"><circle cx="0" cy="0" r="78"/></clipPath>
-    <clipPath id="frame"><rect width="{W}" height="{H}" rx="18"/></clipPath>
-    {DEFS_COMMON}
-  </defs>
-  <style>{COMMON_STYLE}
-    .float{{animation:float var(--t,9s) ease-in-out infinite;}}
-    @keyframes float{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-14px)}}}}
-    .fall{{animation:fall 1.2s linear infinite;}}
-    @keyframes fall{{to{{stroke-dashoffset:-32}}}}
-    .aurora{{animation:aurora 18s ease-in-out infinite alternate;}}
-    @keyframes aurora{{0%{{transform:translate(-60px,0)}}100%{{transform:translate(60px,-20px)}}}}
-    .fadeup{{animation:fadeup 1.6s cubic-bezier(.2,.7,.2,1) both;}}
-    @keyframes fadeup{{from{{opacity:0;transform:translateY(14px)}}to{{opacity:1;transform:translateY(0)}}}}
-    .breath{{animation:breath 5s ease-in-out infinite;}}
-    @keyframes breath{{0%,100%{{opacity:.75}}50%{{opacity:1}}}}
-    .shoot{{animation:shoot 9s ease-in infinite;opacity:0;}}
-    @keyframes shoot{{0%,78%{{transform:translate(260px,40px);opacity:0}}80%{{opacity:1}}92%{{transform:translate(620px,160px);opacity:0}}100%{{opacity:0}}}}
-    .ring{{animation:spin 90s linear infinite;transform-box:fill-box;transform-origin:center;}}
-    @keyframes spin{{to{{transform:rotate(360deg)}}}}
-  </style>
-
-  <g clip-path="url(#frame)">
-    <rect width="{W}" height="{H}" fill="url(#sky)"/>
-
-    <!-- aurora haze -->
-    <g class="aurora" opacity=".55">
-      <ellipse cx="300" cy="120" rx="260" ry="70" fill="#0ea5b7" filter="url(#blur40)" opacity=".45"/>
-      <ellipse cx="820" cy="90" rx="300" ry="60" fill="#7c3aed" filter="url(#blur40)" opacity=".35"/>
-      <ellipse cx="600" cy="300" rx="420" ry="80" fill="#0e7490" filter="url(#blur40)" opacity=".35"/>
-    </g>
-
-    <!-- stars -->
-    {stars(rnd, 90, W, 300)}
-
-    <!-- Polyphemus, the gas giant in Pandora's sky -->
-    <g transform="translate(1010 92)" opacity=".85">
-      <circle r="96" fill="#5ef2ff" opacity=".08" filter="url(#softglow)"/>
-      <circle r="78" fill="url(#planet)"/>
-      <g clip-path="url(#planetclip)" opacity=".35">
-        <rect x="-80" y="-40" width="160" height="10" fill="#cfefff"/>
-        <rect x="-80" y="-14" width="160" height="6" fill="#0b2a52"/>
-        <rect x="-80" y="8" width="160" height="14" fill="#cfefff" opacity=".6"/>
-        <rect x="-80" y="34" width="160" height="5" fill="#0b2a52"/>
-      </g>
-      <circle r="78" fill="none" stroke="#bff7ff" stroke-opacity=".35"/>
-    </g>
-
-    <!-- floating mountains -->
-    {mountains}
-
-    <!-- mist -->
-    <rect y="300" width="{W}" height="140" fill="#0e7490" opacity=".08" filter="url(#blur40)"/>
-
-    <!-- bioluminescent forest floor -->
-    {forest(rnd, W, 420, 70, 70)}
-    {ground(W, H, 418, rnd)}
-    <g>
-      {"".join(f'<circle class="pulse" cx="{rnd.uniform(0, W):.0f}" cy="{rnd.uniform(422, 438):.0f}" r="{rnd.uniform(1, 2.2):.1f}" fill="{rnd.choice(["#5ef2ff", "#c084fc", "#7cffcb"])}" filter="url(#glow)" style="--t:{rnd.uniform(2, 5):.1f}s;animation-delay:-{rnd.uniform(0, 5):.1f}s"/>' for _ in range(45))}
-    </g>
-
-    <!-- woodsprites -->
-    {seeds(rnd, 22, W, 440, 440)}
-
-    <!-- shooting star -->
-    <g class="shoot"><path d="M0 0 L-120 -40" stroke="url(#shootg)" stroke-width="2" stroke-linecap="round"/><circle r="2.2" fill="#fff" filter="url(#glow)"/></g>
-
-    <!-- ikran in flight -->
-    {IKRAN.format(path="M-120 210 C 200 120, 420 90, 640 70 S 1050 140, 1340 60", dur=26, begin=0, sc=.9)}
-    {IKRAN.format(path="M1320 120 C 1000 40, 760 60, 560 40 S 160 120, -140 70", dur=34, begin=-14, sc=.55)}
-
-    <!-- title -->
-    <ellipse cx="600" cy="205" rx="420" ry="120" fill="url(#vignette)"/>
-    <g text-anchor="middle" font-family="{FONT}">
-      <g>
-        <text x="600" y="132" font-size="14" letter-spacing="7" fill="#7dd3fc" opacity=".9">OEL NGATI KAMEIE  ·  I SEE YOU</text>
-      </g>
-      <g>
-        <text x="600" y="212" font-size="66" font-weight="800" letter-spacing="9" fill="#5ef2ff" opacity=".35" filter="url(#softglow)">SHRAMIK MASTI</text>
-        <text class="breath" x="600" y="212" font-size="66" font-weight="800" letter-spacing="9" fill="url(#namegrad)">SHRAMIK MASTI</text>
-      </g>
-      <g>
-        <path d="M430 240 H560 M640 240 H770" stroke="#5ef2ff" stroke-opacity=".45"/>
-        <circle cx="600" cy="240" r="4" fill="#5ef2ff" filter="url(#glow)"/>
-        <circle cx="600" cy="240" r="10" fill="none" stroke="#5ef2ff" stroke-opacity=".5" stroke-dasharray="3 4" class="ring"/>
-      </g>
-      <g>
-        <text x="600" y="282" font-size="22" font-weight="600" letter-spacing="2" fill="#e0f2fe">Java Developer @ Telusko  ·  Spring AI  ·  Agentic AI</text>
-        <text x="600" y="314" font-size="15" letter-spacing="1.5" fill="#94c9e0">Building AI powered, production grade systems with Spring Boot, LangChain &amp; LangGraph</text>
-      </g>
-    </g>
-  </g>
-  <rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="18" fill="none" stroke="#5ef2ff" stroke-opacity=".18"/>
-</svg>'''
-    return svg
-
-
-# ───────────────────────────── DIVIDER ─────────────────────────────
-def divider():
-    W, H = 1200, 36
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="divider">
-  <defs>
-    <linearGradient id="line" x1="0" x2="1">
-      <stop offset="0" stop-color="#5ef2ff" stop-opacity="0"/>
-      <stop offset=".5" stop-color="#5ef2ff" stop-opacity=".6"/>
-      <stop offset="1" stop-color="#c084fc" stop-opacity="0"/>
-    </linearGradient>
-    <radialGradient id="spark"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#5ef2ff"/><stop offset="1" stop-color="#5ef2ff" stop-opacity="0"/></radialGradient>
-    {DEFS_COMMON}
-  </defs>
-  <style>{COMMON_STYLE}
-    .travel{{animation:travel 6s cubic-bezier(.45,0,.55,1) infinite;}}
-    @keyframes travel{{0%{{transform:translateX(120px);opacity:0}}15%{{opacity:1}}85%{{opacity:1}}100%{{transform:translateX(1080px);opacity:0}}}}
-  </style>
-  <path d="M60 18 H1140" stroke="url(#line)" stroke-width="1.5"/>
-  <g class="travel"><ellipse cx="0" cy="18" rx="40" ry="6" fill="url(#spark)" opacity=".8"/><circle cx="0" cy="18" r="2.5" fill="#fff"/></g>
-  <g transform="translate(600 18)">
-    <path d="M-14 0 L0 -8 L14 0 L0 8 Z" fill="#04122a" stroke="#5ef2ff" stroke-opacity=".8"/>
-    <circle class="pulse" r="3" fill="#5ef2ff" filter="url(#glow)" style="--t:2.6s"/>
-  </g>
-</svg>'''
-
-
-# ───────────────────────────── FOOTER ─────────────────────────────
-def footer():
-    rnd = random.Random(21)
-    W, H = 1200, 200
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="Thanks for visiting">
-  <defs>
-    <linearGradient id="fsky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#062033"/>
-      <stop offset=".45" stop-color="#04122a"/>
-      <stop offset="1" stop-color="#01040c"/>
-    </linearGradient>
-    <clipPath id="frame"><rect width="{W}" height="{H}" rx="18"/></clipPath>
-    {DEFS_COMMON}
-  </defs>
-  <style>{COMMON_STYLE}</style>
-  <g clip-path="url(#frame)">
-    <rect width="{W}" height="{H}" fill="url(#fsky)"/>
-    {stars(rnd, 30, W, 90)}
-    {forest(rnd, W, 196, 80, 90)}
-    {ground(W, H, 192, rnd)}
-    {seeds(rnd, 12, W, 200, 200)}
-    <g text-anchor="middle" font-family="{FONT}">
-      <text x="600" y="88" font-size="26" font-weight="700" letter-spacing="6" fill="#e0fbff" filter="url(#glow)">OEL NGATI KAMEIE</text>
-      <text x="600" y="118" font-size="14" letter-spacing="3" fill="#7dd3fc">I SEE YOU  ·  THANKS FOR VISITING</text>
-    </g>
-  </g>
-</svg>'''
-
-
-def braid(x0, x1, y, amp=7, waves=7):
-    """Two interleaved sine strands, like a Na'vi queue."""
-    import math
-    out = []
-    for phase in (0, math.pi):
-        pts = []
-        for i in range(61):
-            t = i / 60
-            x = x0 + (x1 - x0) * t
-            pts.append(f"{x:.1f} {y + amp * math.sin(t * waves * 2 * math.pi + phase):.1f}")
-        out.append("M" + " L".join(pts))
-    return out
-
-
-def tendrils(x, y, direction, color):
-    out = []
-    for i, dy in enumerate([-18, -11, -5, 0, 5, 11, 18]):
-        ex = x + direction * (34 + abs(dy) * .4)
-        out.append(f'<path class="tend" d="M{x} {y} C{x + direction * 14} {y} {ex - direction * 12} {y + dy} {ex} {y + dy}" '
-                   f'stroke="{color}" stroke-width="1.2" fill="none" style="animation-delay:-{i * .3:.1f}s"/>')
+        x, y = rnd.uniform(20, W - 20), rnd.uniform(20, H - 20)
+        if avoid and avoid[0] < x < avoid[2] and avoid[1] < y < avoid[3]:
+            continue
+        s = rnd.uniform(2, 4)
+        out.append(f'<path class="pulse" d="M{x - s:.0f} {y:.0f} H{x + s:.0f} M{x:.0f} {y - s:.0f} V{y + s:.0f}" '
+                   f'stroke="{DIM}" stroke-width="1" style="--t:{rnd.uniform(3, 7):.1f}s;animation-delay:-{rnd.uniform(0, 6):.1f}s"/>')
     return "".join(out)
 
 
-NAVI_DOTS = [(-14, -14, 2.4, "#5ef2ff", 2.6, 0), (-6, -20, 1.8, "#7cffcb", 3, 1), (4, -22, 1.6, "#5ef2ff", 2.2, .5),
-             (14, -14, 2.4, "#5ef2ff", 2.8, 1.5), (-18, 0, 1.8, "#c084fc", 3.2, .8), (18, 0, 1.8, "#c084fc", 3.4, .2),
-             (-12, 14, 2, "#5ef2ff", 2.4, 1.2), (0, 18, 2.2, "#7cffcb", 3, .4), (12, 14, 2, "#5ef2ff", 2.6, 2)]
+def woodsprite(x, y, dx, t, delay, scale=1):
+    """An atokirina seed, drawn in ink with a faint glowing heart."""
+    legs = "".join(f'<path d="M0 0 C{a * .3:.1f} -6 {a * .7:.1f} -10 {a:.1f} {-14 + abs(a) * .4:.1f}"/>'
+                   for a in (-12, -7, -2, 3, 8, 12))
+    return (f'<g transform="translate({x} {y}) scale({scale})"><g class="drift" '
+            f'style="--t:{t}s;--dx:{dx}px;animation-delay:-{delay}s">'
+            f'<g stroke="{CREAM}" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".85">{legs}</g>'
+            f'<circle r="5" fill="{TEAL}" opacity=".25" filter="url(#glow)"/><circle r="1.8" fill="{CREAM}"/></g></g>')
 
 
-# Original illustration of Jake Sully in his Na'vi form, drawn as a side-profile bust facing right.
+def embed_fonts(svg):
+    chars = set(html.unescape("".join(re.findall(r">([^<>]+)<", svg)))) | {" "}
+    css = []
+    for fam, fn in FONT_FILES.items():
+        if f"'{fam}'" not in svg:
+            continue
+        opts = subset.Options()
+        opts.flavor = "woff"
+        opts.layout_features = ["kern", "liga", "calt", "clig"]
+        opts.name_IDs = []
+        font = subset.load_font(os.path.join(FONT_DIR, fn), opts)
+        sub = subset.Subsetter(opts)
+        sub.populate(text="".join(sorted(chars)))
+        sub.subset(font)
+        buf = io.BytesIO()
+        subset.save_font(font, buf, opts)
+        b64 = base64.b64encode(buf.getvalue()).decode()
+        css.append(f"@font-face{{font-family:'{fam}';src:url(data:font/woff;base64,{b64}) format('woff');}}")
+    return svg.replace("/*FONTS*/", "".join(css))
+
+
+# ───────────────────────────── HEADER ─────────────────────────────
+MOUNTAIN = ("M-62 0 C-55 -18 -38 -30 -14 -34 C8 -38 40 -30 62 -6 C66 4 58 10 50 18 C40 40 28 72 12 112 "
+            "C6 126 -2 128 -6 112 C-16 76 -30 44 -48 22 C-58 14 -66 8 -62 0 Z")
+
+
+def hatch(x0, y0, x1, y1, gap=6, color=DIM, opacity=.45):
+    lines = []
+    k = x0 - (y1 - y0)
+    while k < x1:
+        lines.append(f"M{k:.0f} {y1} L{k + (y1 - y0):.0f} {y0}")
+        k += gap
+    return f'<path d="{" ".join(lines)}" stroke="{color}" stroke-width=".8" opacity="{opacity}"/>'
+
+
+def ink_mountain(rnd, cid, detail=True, stroke=CREAM):
+    tufts = []
+    x = -58
+    while x < 58:
+        h = rnd.uniform(4, 9)
+        tufts.append(f"M{x:.0f} {-12 - (1 - (x / 62) ** 2) * 20:.0f} l2 -{h:.0f} l2 {h:.0f}")
+        x += rnd.uniform(5, 9)
+    trees = ""
+    if detail:
+        for tx, th in [(-30, 22), (-12, 30), (18, 26), (38, 18)]:
+            ty = -12 - (1 - (tx / 62) ** 2) * 22
+            trees += (f'<path d="M{tx} {ty:.0f} v-{th} M{tx} {ty - th * .6:.0f} q-8 -4 -10 -12 M{tx} {ty - th * .8:.0f} '
+                      f'q7 -4 9 -10" stroke="{stroke}" stroke-width="1" fill="none"/>'
+                      f'<path d="M{tx - 9} {ty - th:.0f} q9 -14 18 0 q-9 6 -18 0 z" stroke="{stroke}" stroke-width="1" fill="none"/>')
+    vines = "".join(f'<path d="M{vx} {vy} q{rnd.uniform(-5, 5):.0f} {vl / 2:.0f} {rnd.uniform(-4, 4):.0f} {vl}" '
+                    f'stroke="{DIM}" stroke-width=".9" fill="none"/>'
+                    for vx, vy, vl in [(-44, 16, 34), (-30, 30, 50), (-16, 44, 62), (24, 40, 44), (40, 22, 30)])
+    hatching = ""
+    if detail:
+        hatching = (f'<clipPath id="{cid}"><path d="{MOUNTAIN}"/></clipPath>'
+                    f'<g clip-path="url(#{cid})">{hatch(8, -40, 70, 130)}{hatch(-70, 30, 70, 130, gap=9, opacity=.25)}</g>')
+    return (f'{hatching}<path d="{MOUNTAIN}" stroke="{stroke}" stroke-width="1.6" fill="none" stroke-linejoin="round"/>'
+            f'<path d="M-50 -2 C-30 6 -10 2 6 8 S40 4 56 10" stroke="{stroke}" stroke-width=".8" fill="none" opacity=".6"/>'
+            f'<path d="{" ".join(tufts)}" stroke="{stroke}" stroke-width=".9" fill="none"/>{trees}{vines}')
+
+
+IKRAN_INK = f"""<g>
+      <g><animateTransform attributeName="transform" type="scale" values="1 1;1 .2;1 1" dur="1.2s" repeatCount="indefinite"/>
+        <path d="M-6 -2 C-10 -20 -2 -36 14 -46 C8 -30 10 -16 12 -2" stroke="{CREAM}" stroke-width="1.3" fill="{BG}"/>
+        <path d="M-6 2 C-10 20 -2 36 14 46 C8 30 10 16 12 2" stroke="{CREAM}" stroke-width="1.3" fill="{BG}"/>
+        <path d="M0 -8 L8 -36 M0 8 L8 36" stroke="{DIM}" stroke-width=".8"/>
+      </g>
+      <path d="M-24 0 C-12 -4 12 -4 24 0 C12 4 -12 4 -24 0 Z" stroke="{CREAM}" stroke-width="1.3" fill="{BG}"/>
+      <path d="M24 0 L36 -3 L32 0 L36 3 Z M-24 0 L-38 -4 M-24 0 L-38 4" stroke="{CREAM}" stroke-width="1.1" fill="none"/>
+    </g>"""
+
+
+def header():
+    rnd = random.Random(3)
+    W, H = 1200, 460
+    body = f"""{svg_open(W, H, "Field notes of Shramik Masti, Java developer at Telusko", "Shramik Masti · Field Notes")}
+  {defs()}
+  <style>{STYLE}</style>
+  {paper(W, H)}
+    {specks(rnd, 26, W, H, avoid=(520, 90, 1180, 420))}
+
+    <!-- fig. 1: floating mountains -->
+    <ellipse cx="250" cy="200" rx="170" ry="150" fill="{TEAL}" opacity=".10" filter="url(#wash)"/>
+    <g class="boil">
+      <g transform="translate(440 112) scale(.62)"><g class="bob" style="--t:11s;animation-delay:-4s">{ink_mountain(rnd, "mc2", False, DIM)}</g></g>
+      <g transform="translate(250 196) scale(1.75)"><g class="bob" style="--t:9s">
+        {ink_mountain(rnd, "mc1")}
+        <path class="march" d="M28 -6 C30 30 27 70 31 128" stroke="{TEAL}" stroke-width="1.2" stroke-dasharray="3 5" fill="none" opacity=".8"/>
+        <path class="march" d="M33 -4 C35 30 33 70 36 120" stroke="{TEAL}" stroke-width=".8" stroke-dasharray="2 6" fill="none" opacity=".5" style="animation-delay:-.7s"/>
+      </g></g>
+      <g transform="translate(90 330) scale(.4)"><g class="bob" style="--t:12s;animation-delay:-7s">{ink_mountain(rnd, "mc3", False, DIM)}</g></g>
+      <g><animateMotion dur="20s" repeatCount="indefinite" rotate="auto" path="M70 150 C110 40 400 30 450 140 C480 230 300 260 200 250 C100 240 40 230 70 150 Z"/>
+        <g transform="scale(.75)">{IKRAN_INK}</g></g>
+    </g>
+
+    <g font-family="{HAND}" fill="{DIM}">
+      <text x="372" y="318" font-size="25" transform="rotate(-4 372 318)">Hallelujah Mts.</text>
+      <text x="380" y="343" font-size="20" transform="rotate(-4 380 343)">(gravity: optional)</text>
+      <text x="64" y="72" font-size="21" transform="rotate(-3 64 72)">ikran, circling</text>
+      <text x="200" y="440" font-size="20">fig. 1</text>
+    </g>
+    {arrow(370, 300, 330, 268, -18)}
+    {arrow(110, 80, 150, 112, 14)}
+
+    {woodsprite(470, 430, 26, 30, 4, 1.1)}
+    {woodsprite(140, 470, -20, 36, 20, .8)}
+
+    <!-- title block -->
+    <g>
+      <text x="566" y="140" font-family="{HAND}" font-size="34" fill="{TEAL}" transform="rotate(-3 566 140)">field notes of</text>
+      <text x="556" y="232" font-family="{SERIF}" font-size="86" fill="{CREAM}" letter-spacing="-1">Shramik Masti</text>
+      {swoosh(566, 1080, 256)}
+      <text x="560" y="306" font-family="{SERIF_I}" font-size="29" fill="{CREAM}">Java developer at Telusko.</text>
+      <text x="560" y="350" font-family="{HAND}" font-size="28" fill="{DIM}">I build backends with Spring Boot, and lately</text>
+      <text x="560" y="382" font-family="{HAND}" font-size="28" fill="{DIM}">AI agents that actually make it to production.</text>
+    </g>
+    <g transform="rotate(-1.5 1010 420)">
+      <rect class="boil" x="850" y="400" width="316" height="36" fill="none" stroke="{DIM}" stroke-width="1"/>
+      <text x="1008" y="423" text-anchor="middle" font-family="{SERIF}" font-size="13" letter-spacing="3" fill="{DIM}">ENTRY Nº 01  ·  PUNE, EARTH  ·  2026</text>
+    </g>
+    {tape(70, 18, 120, -8)}{tape(1135, 20, 110, 7)}
+  </g>
+</svg>"""
+    return body
+
+
+# ───────────────────────────── JOURNEY (trail map) ─────────────────────────────
+STOPS = [
+    (120, 205, "2020", "BSc Computer Science", "Dr. Ghali College", "book"),
+    (355, 128, "2023", "MCA", "D.Y. Patil Agri &amp; Tech University", "cap"),
+    (595, 214, "Apr 2024", "Java Developer Intern", "Code Crafter Services", "tent"),
+    (835, 122, "Mar 2025", "Java Developer", "Telusko", "tree"),
+    (1070, 186, "now", "Agentic AI", "Spring AI, LangGraph, MCP", "flag"),
+]
+
+
+def icon(kind, x, y):
+    s = f'stroke="{CREAM}" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"'
+    if kind == "book":
+        return (f'<path d="M{x - 22} {y - 6} q11 -6 22 0 q11 -6 22 0 v-26 q-11 -6 -22 0 q-11 -6 -22 0 z M{x} {y - 6} v-26 '
+                f'M{x - 17} {y - 24} q6 -3 12 0 M{x - 17} {y - 17} q6 -3 12 0 M{x + 5} {y - 24} q6 -3 12 0" {s}/>')
+    if kind == "cap":
+        return (f'<path d="M{x - 26} {y - 26} L{x} {y - 38} L{x + 26} {y - 26} L{x} {y - 15} Z M{x - 14} {y - 21} v10 '
+                f'q14 8 28 0 v-10 M{x + 20} {y - 23} v14 l-3 6 h6 l-3 -6" {s}/>')
+    if kind == "tent":
+        return (f'<path d="M{x - 26} {y - 6} L{x} {y - 42} L{x + 26} {y - 6} Z M{x} {y - 42} L{x - 6} {y - 6} M{x} {y - 42} '
+                f'L{x + 7} {y - 6} M{x - 30} {y - 6} h60 M{x + 32} {y - 8} q4 -10 0 -16 q6 6 4 16" {s}/>')
+    if kind == "tree":
+        return (f'<path d="M{x - 4} {y - 6} q2 -16 -2 -30 M{x + 5} {y - 6} q-2 -16 2 -30 M{x - 8} {y - 6} q-6 -2 -10 2 '
+                f'M{x + 9} {y - 6} q6 -2 10 2 M{x - 26} {y - 40} q-6 -14 10 -18 q4 -14 20 -10 q14 -8 22 6 q14 2 8 18 '
+                f'q-10 10 -24 6 q-10 6 -22 0 q-12 2 -14 -2 z" {s}/>'
+                f'<circle class="pulse" cx="{x - 10}" cy="{y - 48}" r="1.6" fill="{TEAL}" style="--t:3s"/>'
+                f'<circle class="pulse" cx="{x + 12}" cy="{y - 52}" r="1.6" fill="{TEAL}" style="--t:4s;animation-delay:-1s"/>')
+    return (f'<path d="M{x} {y - 6} v-44 M{x} {y - 50} q12 -6 24 0 q-12 6 0 12 q-12 -6 -24 0" {s}/>'
+            f'<path d="M{x} {y - 50} q12 -6 24 0 q-12 6 0 12 q-12 -6 -24 0 z" fill="{TEAL}" opacity=".25"/>')
+
+
+def contours(rnd, cx, cy, rings, base):
+    out = []
+    phases = [rnd.uniform(0, 6.28) for _ in range(3)]
+    for r in range(rings):
+        rad = base + r * 16
+        pts = []
+        for i in range(49):
+            a = i / 48 * 2 * math.pi
+            k = 1 + .12 * math.sin(3 * a + phases[0]) + .08 * math.sin(5 * a + phases[1]) + .05 * math.sin(2 * a + phases[2])
+            pts.append(f"{cx + math.cos(a) * rad * k * 1.5:.0f} {cy + math.sin(a) * rad * k:.0f}")
+        out.append("M" + " L".join(pts) + "Z")
+    return f'<path d="{" ".join(out)}" stroke="{FAINT}" stroke-width="1" fill="none"/>'
+
+
+def journey():
+    rnd = random.Random(9)
+    W, H = 1200, 360
+    pts = [(-20, 250)] + [(x, y) for x, y, *_ in STOPS] + [(1230, 150)]
+    d = f"M{pts[0][0]} {pts[0][1]}"
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        mx = (x1 - x0) * .45
+        d += f" C{x0 + mx:.0f} {y0 + rnd.uniform(-30, 30):.0f} {x1 - mx:.0f} {y1 + rnd.uniform(-30, 30):.0f} {x1} {y1}"
+    stops = []
+    for x, y, year, title, place, kind in STOPS:
+        stops.append(f"""<g class="boil">{icon(kind, x, y - 16)}
+      <path d="M{x - 6} {y - 6} L{x + 6} {y + 6} M{x + 6} {y - 6} L{x - 6} {y + 6}" stroke="{TEAL}" stroke-width="2.4" stroke-linecap="round"/></g>
+    <g text-anchor="middle">
+      <text x="{x}" y="{y + 40}" font-family="{HAND}" font-size="27" fill="{TEAL}">{year}</text>
+      <text x="{x}" y="{y + 64}" font-family="{SERIF}" font-size="17" fill="{CREAM}">{title}</text>
+      <text x="{x}" y="{y + 86}" font-family="{HAND}" font-size="20" fill="{DIM}">{place}</text>
+    </g>""")
+    return f"""{svg_open(W, H, "The trail so far: BSc 2020, MCA 2023, intern at Code Crafter Services 2024, Java developer at Telusko 2025, now agentic AI", "The Trail So Far")}
+  {defs()}
+  <style>{STYLE}</style>
+  {paper(W, H)}
+    {contours(rnd, 250, 300, 5, 18)}{contours(rnd, 720, 60, 4, 20)}{contours(rnd, 1120, 330, 4, 14)}
+    <text x="40" y="52" font-family="{HAND}" font-size="34" fill="{TEAL}" transform="rotate(-2 40 52)">the trail so far</text>
+    <text x="44" y="78" font-family="{HAND}" font-size="20" fill="{DIM}">(not to scale)</text>
+    <path class="boil" d="{d}" stroke="{DIM}" stroke-width="1.8" stroke-dasharray="1 9" stroke-linecap="round" fill="none"/>
+    <g><circle r="9" fill="{TEAL}" opacity=".25" filter="url(#glow)"/><circle r="3.2" fill="{TEAL}"/>
+      <animateMotion dur="18s" repeatCount="indefinite" path="{d}"/></g>
+    {"".join(stops)}
+    <text x="926" y="96" font-family="{HAND}" font-size="23" fill="{CREAM}" transform="rotate(-5 926 96)">you are here</text>
+    {arrow(1034, 88, 1066, 116, -14, CREAM)}
+    <g class="boil" transform="translate(1146 62)">
+      <g><animateTransform attributeName="transform" type="rotate" values="-8;6;-8" dur="9s" repeatCount="indefinite"/>
+        <path d="M0 -22 L5 0 L0 22 L-5 0 Z M-22 0 L0 -4 L22 0 L0 4 Z" stroke="{DIM}" stroke-width="1.1" fill="none"/>
+        <path d="M0 -22 L5 0 L-5 0 Z" fill="{AMBER}" opacity=".7"/></g>
+      <text x="0" y="40" text-anchor="middle" font-family="{HAND}" font-size="17" fill="{DIM}">N</text>
+    </g>
+    {tape(60, 14, 100, -6)}
+  </g>
+</svg>"""
+
+
+# ───────────────────────────── HERO (Jake Sully sketch) ─────────────────────────────
 NAVI_BODY = ("M150 58 C185 55 215 70 232 100 C238 110 240 118 238 126 C246 140 256 160 262 172 "
              "C265 178 262 184 254 185 C252 190 254 194 252 198 C248 200 246 201 247 204 "
              "C250 207 250 212 245 216 C246 224 242 232 232 236 C220 240 205 240 196 246 "
              "C192 270 196 290 206 306 C240 318 290 330 318 356 L326 380 L34 380 "
              "C40 352 70 330 112 316 C126 290 128 250 122 210 C108 180 98 150 100 120 "
              "C104 86 122 62 150 58 Z")
-NAVI_FRONT_RIM = ("M150 58 C185 55 215 70 232 100 C238 110 240 118 238 126 C246 140 256 160 262 172 "
-                  "C265 178 262 184 254 185 C252 190 254 194 252 198 C248 200 246 201 247 204 "
-                  "C250 207 250 212 245 216 C246 224 242 232 232 236 C220 240 205 240 196 246 "
-                  "C192 270 196 290 206 306 C240 318 290 330 318 356")
 NAVI_HAIR = ("M232 98 C214 64 180 50 146 54 C116 58 96 84 94 120 C92 150 100 176 112 204 "
              "C116 186 112 160 114 140 C118 112 132 88 156 78 C186 68 214 78 232 98 Z")
-NAVI_EAR = "M150 142 C134 116 122 80 114 36 C142 64 166 100 174 132 C170 146 158 148 150 142 Z"
+NAVI_EAR = "M146 142 C136 118 130 86 128 52 C152 74 172 102 180 128 C174 146 156 150 146 142 Z"
 NAVI_STRIPES = [
     "M196 72 C204 82 206 92 202 100", "M178 66 C186 78 188 90 184 98", "M214 84 C220 92 222 100 218 106",
     "M240 140 C234 146 232 152 234 158", "M206 150 C214 160 216 170 212 178", "M190 160 C196 170 198 180 194 188",
     "M150 214 C160 222 164 232 162 242", "M148 250 C160 258 164 268 162 278", "M150 286 C162 294 168 302 166 310",
 ]
-NAVI_DOTS2 = [(244, 136, 1.8), (249, 146, 1.6), (253, 156, 1.6), (256, 165, 1.4), (226, 104, 1.6), (216, 96, 1.4),
-              (205, 90, 1.6), (218, 168, 1.8), (210, 178, 1.5), (224, 186, 1.4), (200, 196, 1.6),
-              (176, 230, 1.6), (172, 262, 1.6), (178, 296, 1.8), (232, 320, 1.6), (262, 334, 1.8)]
+NAVI_DOTS = [(244, 136), (249, 146), (253, 156), (256, 165), (226, 104), (216, 96), (205, 90), (218, 168),
+             (210, 178), (200, 196), (176, 230), (172, 262), (178, 296), (262, 334)]
 
 
-def navi_portrait(rnd):
-    braids = []
-    for i, (x0, x1, sway) in enumerate([(106, 66, 10), (112, 84, -8), (100, 52, 6)]):
-        braids.append(f'<path class="hairsway" d="M{x0} 150 C{x0 - 20 + sway} 220 {x1 + sway} 280 {x1} 380" '
-                      f'stroke="#081428" stroke-width="{7 - i * 1.5}" fill="none" stroke-linecap="round" '
-                      f'style="animation-delay:-{i * 1.3:.1f}s"/>')
-    beads = "".join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{c}"/>' for x, y, r, c in [
-        (88, 238, 3.2, "#f59e0b"), (78, 268, 3, "#5ef2ff"), (72, 300, 3.2, "#e11d48"), (98, 252, 2.6, "#f8fafc")])
-    stripes = "".join(f'<path d="{d}" stroke="#0a1730" stroke-width="3.2" fill="none" stroke-linecap="round" opacity=".55"/>'
-                      for d in NAVI_STRIPES)
-    dots = "".join(f'<circle class="pulse" cx="{x}" cy="{y}" r="{r}" fill="{"#7cffcb" if i % 4 == 0 else "#5ef2ff"}" '
-                   f'filter="url(#glow)" style="--t:{rnd.uniform(2, 4):.1f}s;animation-delay:-{rnd.uniform(0, 4):.1f}s"/>'
-                   for i, (x, y, r) in enumerate(NAVI_DOTS2))
-    necklace = "".join(f'<circle cx="{150 + i * 20}" cy="{322 + (i * 20 - 70) ** 2 / 520:.0f}" r="{4 if i % 2 else 3}" '
-                       f'fill="{"#f59e0b" if i % 3 == 0 else "#5ef2ff" if i % 3 == 1 else "#f8fafc"}"/>' for i in range(8))
+def jake_sketch(rnd):
+    braids = "".join(
+        f'<path class="sway" d="M{x0} 150 C{x0 - 20 + s} 220 {x1 + s} 280 {x1} 380" stroke="{CREAM}" stroke-width="{w}" '
+        f'stroke-dasharray="5 2" fill="none" stroke-linecap="round" style="animation-delay:-{i * 1.4:.1f}s"/>'
+        for i, (x0, x1, s, w) in enumerate([(106, 66, 10, 2.2), (112, 84, -8, 1.6), (100, 52, 6, 1.4)]))
+    beads = "".join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{c}" stroke="{CREAM}" stroke-width=".8"/>'
+                    for x, y, r, c in [(88, 238, 3.4, AMBER), (78, 268, 3, TEAL), (72, 300, 3.2, AMBER), (98, 252, 2.6, CARD)])
+    stripes = "".join(f'<path d="{d}" stroke="{DIM}" stroke-width="1.3" fill="none" stroke-linecap="round"/>' for d in NAVI_STRIPES)
+    dots = "".join(f'<circle class="pulse" cx="{x}" cy="{y}" r="1.5" fill="{TEAL}" '
+                   f'style="--t:{rnd.uniform(2.5, 5):.1f}s;animation-delay:-{rnd.uniform(0, 5):.1f}s"/>' for x, y in NAVI_DOTS)
+    hair_lines = "".join(f'<path d="M{a}" stroke="{CREAM}" stroke-width=".9" fill="none" opacity=".7"/>' for a in [
+        "216 84 C190 66 150 64 128 84", "206 80 C180 70 146 76 124 100", "140 66 C116 80 104 110 106 150",
+        "130 72 C110 92 102 130 108 180"])
+    necklace = "".join(f'<circle cx="{150 + i * 20}" cy="{322 + (i * 20 - 70) ** 2 / 520:.0f}" r="{3.6 if i % 2 else 2.8}" '
+                       f'fill="{AMBER if i % 3 == 0 else CARD}" stroke="{CREAM}" stroke-width=".8"/>' for i in range(8))
     return f"""
-      <circle cx="190" cy="170" r="150" fill="url(#halo)"/>
-      <circle cx="190" cy="170" r="162" fill="none" stroke="#5ef2ff" stroke-opacity=".25" stroke-dasharray="2 7" class="spin"/>
-      <circle cx="190" cy="170" r="176" fill="none" stroke="#c084fc" stroke-opacity=".18" stroke-dasharray="14 10" class="spinr"/>
-      <path d="M58 120 Q-4 250 66 386" stroke="#c084fc" stroke-width="3" fill="none" opacity=".75"/>
-      <path d="M58 120 L66 386" stroke="#e9d5ff" stroke-width=".8" opacity=".5"/>
-      {"".join(braids)}
-      {beads}
-      <path d="{NAVI_BODY}" fill="url(#skin)"/>
+      <clipPath id="bodyclip"><path d="{NAVI_BODY}"/></clipPath>
+      <path d="M58 120 Q-4 250 66 386" stroke="{DIM}" stroke-width="2" fill="none"/>
+      <path d="M58 120 L66 386" stroke="{DIM}" stroke-width=".7"/>
+      {braids}{beads}
+      <path d="{NAVI_BODY}" fill="{CARD}" fill-opacity=".55" stroke="{CREAM}" stroke-width="1.8" stroke-linejoin="round"/>
+      <g clip-path="url(#bodyclip)">{hatch(90, 160, 170, 380, gap=5, opacity=.4)}{hatch(60, 300, 330, 380, gap=8, opacity=.25)}</g>
       {stripes}
-      <path d="{NAVI_HAIR}" fill="#081428"/>
-      <path d="M150 62 C126 70 110 92 106 120" stroke="#1e3a5f" stroke-width="1.5" fill="none"/>
-      <path d="{NAVI_EAR}" fill="url(#skin)" stroke="#5ef2ff" stroke-opacity=".45" stroke-width="1.2"/>
-      <path d="M154 134 C142 114 132 86 126 58" stroke="#0a1730" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".6"/>
-      <path class="rim" d="{NAVI_FRONT_RIM}" stroke="#5ef2ff" stroke-width="2" fill="none" filter="url(#glow)"/>
-      <path d="M204 118 C214 112 228 112 238 118" stroke="#0a1730" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <path d="M208 128 C216 120 228 119 236 124 C230 132 218 134 208 128 Z" fill="#06101f"/>
-      <circle class="eye" cx="226" cy="126" r="4.2" fill="#fcd34d" filter="url(#glow)"/>
-      <circle cx="227" cy="125" r="1.4" fill="#06101f"/>
-      <path d="M249 186 C245 184 243 180 246 177" stroke="#0a1730" stroke-width="1.8" fill="none"/>
+      <path d="{NAVI_HAIR}" fill="{BG}" stroke="{CREAM}" stroke-width="1.6"/>
+      {hair_lines}
+      <path d="{NAVI_EAR}" fill="{CARD}" stroke="{CREAM}" stroke-width="1.6"/>
+      <path d="M154 134 C146 114 140 90 136 68" stroke="{DIM}" stroke-width="1.2" fill="none"/>
+      <path d="M204 118 C214 112 228 112 238 118" stroke="{CREAM}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M208 128 C216 120 228 119 236 124 C230 132 218 134 208 128 Z" fill="{BG}" stroke="{CREAM}" stroke-width="1.2"/>
+      <circle class="blink" cx="225" cy="126" r="4" fill="{AMBER}"/>
+      <path d="M249 186 C245 184 243 180 246 177" stroke="{CREAM}" stroke-width="1.4" fill="none"/>
+      <path d="M244 205 C240 205 236 204 232 202" stroke="{CREAM}" stroke-width="1.2" fill="none"/>
       {dots}
-      <path d="M144 318 Q220 352 300 336" stroke="#c2410c" stroke-width="1.5" fill="none"/>
+      <path d="M144 318 Q220 352 300 336" stroke="{DIM}" stroke-width="1.2" fill="none"/>
       {necklace}
     """
 
 
-# ───────────────────────────── HERO (Jake Sully) ─────────────────────────────
 def hero():
-    rnd = random.Random(11)
-    W, H = 1200, 420
-    left = "".join(f'<path class="strand" d="{d}" stroke="#5ef2ff" stroke-width="1.6" fill="none" opacity=".8"/>'
-                   for d in braid(610, 740, 352, amp=5, waves=5))
-    right = "".join(f'<path class="strand" d="{d}" stroke="#c084fc" stroke-width="1.6" fill="none" opacity=".8" '
-                    f'style="animation-direction:reverse"/>' for d in braid(800, 930, 352, amp=5, waves=5))
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="The hero I follow: Jake Sully, Toruk Makto. Original illustration of Jake in his Na'vi form.">
-  <title>The Hero I Follow · Jake Sully</title>
-  <defs>
-    <linearGradient id="hbg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#030b1a"/><stop offset=".6" stop-color="#06182e"/><stop offset="1" stop-color="#0d1033"/>
-    </linearGradient>
-    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1d4e89"/><stop offset=".55" stop-color="#16467a"/><stop offset="1" stop-color="#0c2a52"/>
-    </linearGradient>
-    <radialGradient id="halo" cx=".55" cy=".45" r=".6">
-      <stop offset="0" stop-color="#0ea5b7" stop-opacity=".45"/><stop offset=".7" stop-color="#0e7490" stop-opacity=".12"/><stop offset="1" stop-color="#0e7490" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="jake" x1="0" y1="0" x2="1" y2="0" spreadMethod="reflect">
-      <stop offset="0" stop-color="#5ef2ff"/><stop offset=".5" stop-color="#e0fbff"/><stop offset="1" stop-color="#c084fc"/>
-      <animateTransform attributeName="gradientTransform" type="translate" values="-0.5 0;0.5 0;-0.5 0" dur="10s" repeatCount="indefinite"/>
-    </linearGradient>
-    <clipPath id="frame"><rect width="{W}" height="{H}" rx="18"/></clipPath>
-    {DEFS_COMMON}
-  </defs>
-  <style>{COMMON_STYLE}
-    .strand{{stroke-dasharray:4 3;animation:flow 2.4s linear infinite;}}
-    @keyframes flow{{to{{stroke-dashoffset:-28}}}}
-    .tend{{animation:reach 3s ease-in-out infinite;}}
-    @keyframes reach{{0%,100%{{opacity:.4}}50%{{opacity:1}}}}
-    .spin{{animation:spin 40s linear infinite;transform-box:fill-box;transform-origin:center;}}
-    @keyframes spin{{to{{transform:rotate(360deg)}}}}
-    .spinr{{animation:spin 60s linear infinite reverse;transform-box:fill-box;transform-origin:center;}}
-    .rim{{animation:rim 4s ease-in-out infinite;}}
-    @keyframes rim{{0%,100%{{opacity:.45}}50%{{opacity:1}}}}
-    .eye{{animation:eye 6s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}}
-    @keyframes eye{{0%,46%,54%,100%{{transform:scaleY(1)}}50%{{transform:scaleY(.1)}}}}
-    .hairsway{{animation:hair 6s ease-in-out infinite;transform-box:fill-box;transform-origin:top center;}}
-    @keyframes hair{{0%,100%{{transform:rotate(-1.5deg)}}50%{{transform:rotate(1.5deg)}}}}
-    .breathe{{animation:breathe 7s ease-in-out infinite;}}
-    @keyframes breathe{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-4px)}}}}
-  </style>
-  <g clip-path="url(#frame)">
-    <rect width="{W}" height="{H}" fill="url(#hbg)"/>
-    <ellipse cx="860" cy="170" rx="320" ry="120" fill="#7c3aed" opacity=".14" filter="url(#blur40)"/>
-    {stars(rnd, 55, W, H)}
+    rnd = random.Random(12)
+    W, H = 1200, 480
+    return f"""{svg_open(W, H, "The one I follow: Jake Sully, Toruk Makto. A hand-drawn sketch of Jake in his Na'vi form.", "The One I Follow · Jake Sully")}
+  {defs()}
+  <style>{STYLE}</style>
+  {paper(W, H)}
+    {specks(rnd, 14, W, H, avoid=(40, 20, 1180, 460))}
 
-    <!-- Jake Sully, Na'vi form (original illustration) -->
-    <g transform="translate(60 34)"><g class="breathe">{navi_portrait(rnd)}</g></g>
-    {seeds(rnd, 8, 460, 420, 420)}
-
-    <!-- text -->
-    <g font-family="{FONT}">
-      <text x="512" y="92" font-size="13" letter-spacing="6" fill="#7dd3fc">THE HERO I FOLLOW</text>
-      <text x="508" y="158" font-size="66" font-weight="800" letter-spacing="6" fill="#5ef2ff" opacity=".3" filter="url(#softglow)">JAKE SULLY</text>
-      <text x="508" y="158" font-size="66" font-weight="800" letter-spacing="6" fill="url(#jake)">JAKE SULLY</text>
-      <text x="512" y="194" font-size="16" font-weight="600" letter-spacing="1.5" fill="#e9d5ff">Toruk Makto  ·  Olo'eyktan of the Omatikaya</text>
-      <path d="M512 216 H1150" stroke="#5ef2ff" stroke-opacity=".25"/>
-      <text x="512" y="252" font-size="19" font-style="italic" fill="#e0f2fe">"Sometimes your whole life boils down to one insane move."</text>
-      <text x="512" y="286" font-size="14" letter-spacing=".5" fill="#94c9e0">He arrived knowing nothing and learned a whole world. That is how I approach every new stack.</text>
+    <!-- sketch card -->
+    <g transform="rotate(-2.5 250 240)">
+      <rect x="48" y="36" width="410" height="412" fill="{CARD}" stroke="{FAINT}"/>
+      <ellipse cx="275" cy="200" rx="135" ry="140" fill="{TEAL}" opacity=".16" filter="url(#wash)"/>
+      <ellipse cx="306" cy="168" rx="30" ry="26" fill="{AMBER}" opacity=".10" filter="url(#wash)"/>
+      <g class="boil" transform="translate(76 46)">{jake_sketch(rnd)}</g>
+      <g font-family="{HAND}" fill="{DIM}">
+        <text x="330" y="74" font-size="21">ears up:</text>
+        <text x="330" y="96" font-size="21">always listening</text>
+        <text x="352" y="252" font-size="21">amber eyes,</text>
+        <text x="352" y="274" font-size="21">sees everything</text>
+        <text x="66" y="438" font-size="20">fig. 2 · J. Sully, Na’vi form</text>
+      </g>
+      {arrow(326, 80, 212, 88, -16)}
+      {arrow(370, 240, 312, 182, 14)}
+      {tape(90, 40, 90, -24)}{tape(420, 42, 90, 22)}
     </g>
 
-    <!-- tsaheylu: Na'vi and code, bonded -->
-    <g transform="translate(560 352)">
-      <circle r="20" fill="#04122a" stroke="#5ef2ff" stroke-opacity=".6"/>
-      <circle r="8" fill="url(#seedg)"/><circle r="2" fill="#fff"/>
-    </g>
-    {left}{right}
-    {tendrils(740, 352, 1, "#bff7ff")}
-    {tendrils(800, 352, -1, "#e9d5ff")}
-    <circle r="3" fill="#fff" filter="url(#glow)"><animateMotion dur="2.4s" repeatCount="indefinite" path="M580 352 L960 352"/></circle>
-    <g transform="translate(980 352)">
-      <circle r="20" fill="#04122a" stroke="#c084fc" stroke-opacity=".6"/>
-      <text y="5" text-anchor="middle" font-family="Consolas,'Fira Code',monospace" font-size="13" font-weight="700" fill="#e9d5ff">&lt;/&gt;</text>
-    </g>
-    <text x="1020" y="348" font-family="{FONT}" font-size="11" letter-spacing="3" fill="#94c9e0">TSAHEYLU</text>
-    <text x="1020" y="364" font-family="{FONT}" font-size="11" letter-spacing="1" fill="#64748b">Na'vi meets code</text>
-  </g>
-  <rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="18" fill="none" stroke="#5ef2ff" stroke-opacity=".18"/>
-</svg>"""
-
-
-# ───────────────────────────── JOURNEY ─────────────────────────────
-JOURNEY = [
-    ("2020", "BSc Computer Science", "Dr. Ghali College", "THE ARRIVAL"),
-    ("2023", "MCA", "D.Y. Patil Agri &amp; Tech University", "LEARNING THE WAYS"),
-    ("APR 2024", "Java Developer Intern", "Code Crafter Services", "FIRST IKRAN"),
-    ("MAR 2025", "Java Developer", "Telusko", "JOINING THE CLAN"),
-    ("NOW", "Agentic AI Engineering", "Spring AI · LangGraph · MCP", "TORUK MAKTO, NEXT"),
-]
-
-
-def journey():
-    rnd = random.Random(5)
-    W, H = 1200, 250
-    xs = [130 + i * 235 for i in range(len(JOURNEY))]
-    y = 132
-    vine = (f"M40 {y} " + " ".join(f"Q{x - 60} {y - 26 if i % 2 else y + 26} {x} {y}" for i, x in enumerate(xs))
-            + f" Q{xs[-1] + 60} {y - 26} 1160 {y}")
-    cycle = 10
-    nodes = []
-    for i, (x, (year, title, place, saga)) in enumerate(zip(xs, JOURNEY)):
-        delay = cycle * (x - 40) / 1120
-        color = "#c084fc" if i == len(JOURNEY) - 1 else "#5ef2ff"
-        nodes.append(f"""<g transform="translate({x} {y})">
-      <circle r="16" fill="none" stroke="{color}" stroke-opacity=".35"/>
-      <circle class="lit" r="22" fill="{color}" filter="url(#softglow)" style="animation-delay:{delay - cycle:.2f}s"/>
-      <circle r="7" fill="#04122a" stroke="{color}" stroke-width="2"/>
-      <circle r="3" fill="{color}" filter="url(#glow)"/>
-    </g>
-    <g text-anchor="middle" font-family="{FONT}">
-      <text x="{x}" y="{y - 70}" font-size="10" letter-spacing="2.5" fill="#a78bfa">{saga}</text>
-      <text x="{x}" y="{y - 46}" font-size="13" font-weight="700" letter-spacing="3" fill="{color}">{year}</text>
-      <text x="{x}" y="{y + 48}" font-size="15" font-weight="700" fill="#e0f2fe">{title}</text>
-      <text x="{x}" y="{y + 68}" font-size="12" fill="#94c9e0">{place}</text>
-    </g>""")
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-label="My journey from BSc Computer Science to Java Developer at Telusko">
-  <title>My Journey</title>
-  <defs>
-    <linearGradient id="jbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#030b1a"/><stop offset="1" stop-color="#06182e"/></linearGradient>
-    <linearGradient id="vineg" x1="0" x2="1"><stop offset="0" stop-color="#5ef2ff" stop-opacity=".2"/><stop offset=".8" stop-color="#5ef2ff" stop-opacity=".7"/><stop offset="1" stop-color="#c084fc" stop-opacity=".8"/></linearGradient>
-    <clipPath id="frame"><rect width="{W}" height="{H}" rx="18"/></clipPath>
-    {DEFS_COMMON}
-  </defs>
-  <style>{COMMON_STYLE}
-    .lit{{opacity:.15;animation:lit {cycle}s linear infinite;}}
-    @keyframes lit{{0%{{opacity:.85}}12%{{opacity:.15}}100%{{opacity:.15}}}}
-    .vdash{{stroke-dasharray:2 8;animation:vflow 3s linear infinite;}}
-    @keyframes vflow{{to{{stroke-dashoffset:-40}}}}
-  </style>
-  <g clip-path="url(#frame)">
-    <rect width="{W}" height="{H}" fill="url(#jbg)"/>
-    <ellipse cx="600" cy="132" rx="520" ry="70" fill="#0e7490" opacity=".14" filter="url(#blur40)"/>
-    {stars(rnd, 40, W, H)}
-    <path d="{vine}" stroke="url(#vineg)" stroke-width="2.5" fill="none"/>
-    <path class="vdash" d="{vine}" stroke="#bff7ff" stroke-width="1.5" fill="none" opacity=".6"/>
+    <!-- notes -->
     <g>
-      <circle r="10" fill="#5ef2ff" opacity=".35" filter="url(#softglow)"/><circle r="3.5" fill="#fff"/>
-      <animateMotion dur="{cycle}s" repeatCount="indefinite" path="{vine}"/>
+      <text x="566" y="104" font-family="{HAND}" font-size="34" fill="{TEAL}" transform="rotate(-2 566 104)">the one I follow</text>
+      <text x="558" y="194" font-family="{SERIF}" font-size="88" fill="{CREAM}" letter-spacing="-1">Jake Sully</text>
+      <text x="564" y="234" font-family="{SERIF_I}" font-size="21" fill="{DIM}">Toruk Makto  ·  Olo’eyktan of the Omatikaya</text>
+      <text x="556" y="318" font-family="{SERIF}" font-size="96" fill="{TEAL}" opacity=".45">“</text>
+      <text x="604" y="294" font-family="{SERIF_I}" font-size="27" fill="{CREAM}">Sometimes your whole life boils down</text>
+      <text x="604" y="330" font-family="{SERIF_I}" font-size="27" fill="{CREAM}">to one insane move.</text>
+      <text x="566" y="394" font-family="{HAND}" font-size="27" fill="{DIM}">He showed up knowing nothing and learned a whole world.</text>
+      <text x="566" y="426" font-family="{HAND}" font-size="27" fill="{CREAM}">Same plan for every new stack I pick up.</text>
+      {swoosh(566, 960, 438, TEAL, 10, 3, 2.4)}
     </g>
-    {"".join(nodes)}
   </g>
-  <rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="18" fill="none" stroke="#5ef2ff" stroke-opacity=".18"/>
 </svg>"""
 
 
-for name, fn in [("header.svg", header), ("divider.svg", divider), ("footer.svg", footer),
-                 ("hero.svg", hero), ("journey.svg", journey)]:
-    with open(os.path.join(OUT, name), "w", encoding="utf-8") as f:
-        f.write(fn())
-    print("wrote", name)
+# ───────────────────────────── DIVIDER & FOOTER ─────────────────────────────
+def divider():
+    W, H = 1200, 48
+    return f"""{svg_open(W, H, "divider", "divider")}
+  {defs()}
+  <style>{STYLE}</style>
+  <g class="boil" stroke-linecap="round" fill="none">
+    <path d="M120 26 C300 22 420 30 560 25" stroke="#5d6a66" stroke-width="1.4"/>
+    <path d="M640 25 C780 30 900 22 1080 26" stroke="#5d6a66" stroke-width="1.4"/>
+    <path d="M572 30 C584 24 592 16 600 8 C608 16 616 24 628 30" stroke="#8a9a92" stroke-width="1.3"/>
+    <path d="M600 8 C590 14 586 22 588 30 M600 8 C610 14 614 22 612 30" stroke="#8a9a92" stroke-width="1"/>
+  </g>
+  <circle class="pulse" cx="600" cy="32" r="2.6" fill="{TEAL}" filter="url(#glow)" style="--t:3.5s"/>
+</svg>"""
+
+
+def footer():
+    rnd = random.Random(4)
+    W, H = 1200, 250
+    ferns = []
+    for bx, n, flip in [(60, 6, 1), (1140, 6, -1)]:
+        for i in range(n):
+            x = bx + flip * i * 14
+            h = rnd.uniform(40, 90)
+            lean = flip * rnd.uniform(4, 22)
+            ferns.append(f'<path d="M{x:.0f} {H} Q{x + lean / 3:.0f} {H - h / 2:.0f} {x + lean:.0f} {H - h:.0f}" '
+                         f'stroke="{DIM}" stroke-width="1.2" fill="none"/>')
+            ferns.append(f'<circle class="pulse" cx="{x + lean:.0f}" cy="{H - h:.0f}" r="2" fill="{TEAL}" '
+                         f'style="--t:{rnd.uniform(2.5, 5):.1f}s;animation-delay:-{rnd.uniform(0, 4):.1f}s"/>')
+    return f"""{svg_open(W, H, "Oel ngati kameie. I see you. Thanks for reading.", "Oel ngati kameie")}
+  {defs()}
+  <style>{STYLE}</style>
+  {paper(W, H)}
+    {specks(rnd, 12, W, H, avoid=(300, 40, 900, 200))}
+    <g class="boil">{"".join(ferns)}</g>
+    <text x="600" y="108" text-anchor="middle" font-family="{HAND}" font-size="58" fill="{CREAM}">Oel ngati kameie.</text>
+    <text x="600" y="148" text-anchor="middle" font-family="{SERIF_I}" font-size="21" fill="{DIM}">I see you. Thanks for reading my field notes.</text>
+    <text x="842" y="206" font-family="{HAND}" font-size="40" fill="{TEAL}" transform="rotate(-4 842 206)">Shramik</text>
+    {swoosh(838, 976, 214, TEAL, 8, 2, 2)}
+    {woodsprite(330, 250, 18, 28, 6, .9)}
+    {woodsprite(900, 260, -16, 34, 18, .7)}
+  </g>
+</svg>"""
+
+
+if __name__ == "__main__":
+    os.makedirs(OUT, exist_ok=True)
+    for name, fn in [("header.svg", header), ("journey.svg", journey), ("hero.svg", hero),
+                     ("divider.svg", divider), ("footer.svg", footer)]:
+        svg = embed_fonts(fn())
+        with open(os.path.join(OUT, name), "w", encoding="utf-8") as f:
+            f.write(svg)
+        print(f"wrote {name} ({len(svg) // 1024} KB)")
