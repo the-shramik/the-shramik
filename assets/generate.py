@@ -492,6 +492,37 @@ def footer():
 </svg>"""
 
 
+# ───────────────────────────── LINKEDIN BANNER (static, 1584×396) ─────────────────────────────
+def banner():
+    rnd = random.Random(21)
+    W, H = 1584, 396
+    return f"""{svg_open(W, H, "Backends and AI agents that actually make it to production", "LinkedIn banner")}
+  {defs()}
+  <style>{STYLE}</style>
+  {paper(W, H, rx=0)}
+    {specks(rnd, 22, W, H, avoid=(700, 60, 1560, 380))}
+    <ellipse cx="400" cy="150" rx="190" ry="120" fill="{TEAL}" opacity=".10" filter="url(#wash)"/>
+    <g>
+      <g transform="translate(560 96) scale(.55)">{ink_mountain(rnd, "bm2", False, DIM)}</g>
+      <g transform="translate(400 128) scale(1.2)">
+        {ink_mountain(rnd, "bm1")}
+        <path d="M28 -6 C30 30 27 70 31 128" stroke="{TEAL}" stroke-width="1.2" stroke-dasharray="3 5" fill="none" opacity=".8"/>
+      </g>
+      <g transform="translate(250 70) rotate(-12) scale(.7)">{IKRAN_INK}</g>
+    </g>
+    <text x="540" y="292" font-family="{HAND}" font-size="24" fill="{DIM}" transform="rotate(-4 540 292)">fig. 1 · still floating</text>
+
+    <text x="760" y="112" font-family="{HAND}" font-size="38" fill="{TEAL}" transform="rotate(-2 760 112)">currently building</text>
+    <text x="752" y="192" font-family="{SERIF}" font-size="72" fill="{CREAM}" letter-spacing="-1">Backends &amp; AI agents</text>
+    <text x="760" y="246" font-family="{HAND}" font-size="38" fill="{DIM}">that actually make it to production.</text>
+    {swoosh(764, 1290, 262, TEAL, 9, 0, 2.6)}
+    <text x="760" y="318" font-family="{SERIF_I}" font-size="28" fill="{CREAM}">Java · Spring Boot · Spring AI · LangGraph · MCP</text>
+    <text x="1548" y="372" text-anchor="end" font-family="{HAND}" font-size="26" fill="{DIM}">github.com/the-shramik</text>
+    {tape(1500, 16, 120, 6)}
+  </g>
+</svg>"""
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     for name, fn in [("header.svg", header), ("journey.svg", journey), ("hero.svg", hero),
