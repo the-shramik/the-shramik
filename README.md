@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/header.svg" width="100%" alt="Field notes of Shramik Masti, Java developer at Telusko. I build backends with Spring Boot, and lately AI agents that actually make it to production."/>
+<img src="./assets/header.svg?v=3" width="100%" alt="Field notes of Shramik Masti, Java developer at Telusko. I build backends with Spring Boot, and lately AI agents that actually make it to production."/>
 
 <sub>
 <a href="https://www.linkedin.com/in/shramik-masti-5bb3a1212/">LinkedIn</a> &nbsp;·&nbsp;
@@ -11,7 +11,7 @@
 
 </div>
 
-<img src="./assets/divider.svg" width="100%" alt=""/>
+<img src="./assets/divider.svg?v=3" width="100%" alt=""/>
 
 ### 01 &nbsp;Who I am
 
@@ -21,11 +21,11 @@ I like the boring parts of shipping: secure APIs, clean data models, payments th
 
 Away from the keyboard you'll usually find me on a hiking trail or trying out a new coffee.
 
-<img src="./assets/divider.svg" width="100%" alt=""/>
+<img src="./assets/divider.svg?v=3" width="100%" alt=""/>
 
 ### 02 &nbsp;The trail so far
 
-<img src="./assets/journey.svg" width="100%" alt="The trail so far: BSc Computer Science 2020, MCA 2023, Java Developer Intern at Code Crafter Services in April 2024, Java Developer at Telusko in March 2025, and now agentic AI."/>
+<img src="./assets/journey.svg?v=3" width="100%" alt="The trail so far: BSc Computer Science 2020, MCA 2023, Java Developer Intern at Code Crafter Services in April 2024, Java Developer at Telusko in March 2025, and now agentic AI."/>
 
 **Java Developer, Telusko** &nbsp;<sub>March 2025 to now</sub>
 - Built the backend of our **Learning Management System** in Spring Boot, including secure APIs and user management
@@ -40,11 +40,11 @@ Away from the keyboard you'll usually find me on a hiking trail or trying out a 
 
 <sub>MCA, D.Y. Patil Agriculture &amp; Technical University (2023 onwards) &nbsp;·&nbsp; BSc Computer Science, Dr. Ghali College (2020 to 2023) &nbsp;·&nbsp; Certified in Spring &amp; Microservices and as an Industry Ready Java Spring Developer &nbsp;·&nbsp; Attended a Google Developer event in Pune</sub>
 
-<img src="./assets/divider.svg" width="100%" alt=""/>
+<img src="./assets/divider.svg?v=3" width="100%" alt=""/>
 
 ### 03 &nbsp;The one I follow
 
-<img src="./assets/hero.svg" width="100%" alt="The one I follow: Jake Sully, Toruk Makto. A hand-drawn sketch of Jake in his Na'vi form, with the quote: Sometimes your whole life boils down to one insane move."/>
+<img src="./assets/hero.svg?v=3" width="100%" alt="The one I follow: Jake Sully, Toruk Makto. A hand-drawn sketch of Jake in his Na'vi form, with the quote: Sometimes your whole life boils down to one insane move."/>
 
 Jake Sully landed on Pandora as an outsider who knew nothing about that world. He ended up as Toruk Makto, and later as the leader of the Omatikaya. I don't follow him because he wins every fight. I follow him for the way he gets there. These are the habits I've borrowed from him:
 
@@ -54,18 +54,16 @@ Jake Sully landed on Pandora as an outsider who knew nothing about that world. H
 4. **Toruk Makto.** He takes on the challenge nobody else dares to try. When a problem looks impossible, I want to be the one who picks it up. Today that means getting agentic AI into production.
 5. **He protects his own.** In *The Way of Water* he puts his family and his people first. I take ownership of what I ship, from security and tests to keeping production stable.
 
-<img src="./assets/divider.svg" width="100%" alt=""/>
+<img src="./assets/divider.svg?v=3" width="100%" alt=""/>
 
 ### 04 &nbsp;What's in my pack
 
-| | |
-|---|---|
-| **Every day** | Java, Spring Boot, Spring MVC, Spring Data JPA, Spring Security, OAuth2, REST APIs, SQL |
-| **AI work** | Spring AI, LangChain, LangGraph, LangChain4j, MCP, Google ADK |
-| **Ship & run** | Microservices, Spring Cloud, Docker, AWS (S3), Google Cloud, Git |
-| **On the side** | Python, NumPy, JavaScript |
+**Every day** &nbsp;Java, Spring Boot, Spring MVC, Spring Data JPA, Spring Security, OAuth2, REST APIs, SQL<br/>
+**AI work** &nbsp;Spring AI, LangChain, LangGraph, LangChain4j, MCP, Google ADK<br/>
+**Ship &amp; run** &nbsp;Microservices, Spring Cloud, Docker, AWS (S3), Google Cloud, Git<br/>
+**On the side** &nbsp;Python, NumPy, JavaScript
 
-<img src="./assets/divider.svg" width="100%" alt=""/>
+<img src="./assets/divider.svg?v=3" width="100%" alt=""/>
 
 ### 05 &nbsp;Things I've built
 
@@ -75,7 +73,7 @@ Jake Sully landed on Pandora as an outsider who knew nothing about that world. H
 - **[LangChain4j-Demo](https://github.com/the-shramik/LangChain4j-Demo)**: LangChain4j in plain Java and inside a Spring Boot app.
 - **[ai-ml-journey](https://github.com/the-shramik/ai-ml-journey)**: my notebooks from learning AI and ML, starting with Python and NumPy.
 
-<img src="./assets/divider.svg" width="100%" alt=""/>
+<img src="./assets/divider.svg?v=3" width="100%" alt=""/>
 
 ### 06 &nbsp;Tracks
 
@@ -84,6 +82,6 @@ Jake Sully landed on Pandora as an outsider who knew nothing about that world. H
 <img src="https://github-readme-stats.vercel.app/api?username=the-shramik&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=0e1517&title_color=7fd8c3&text_color=e9dfc7&icon_color=e3a857&ring_color=7fd8c3" height="165" alt="GitHub stats"/>
 <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=the-shramik&layout=compact&langs_count=6&hide_border=true&bg_color=0e1517&title_color=7fd8c3&text_color=e9dfc7" height="165" alt="Most used languages"/>
 
-<img src="./assets/footer.svg" width="100%" alt="Oel ngati kameie. I see you. Thanks for reading my field notes. Shramik"/>
+<img src="./assets/footer.svg?v=3" width="100%" alt="Oel ngati kameie. I see you. Thanks for reading my field notes. Shramik"/>
 
 </div>
