@@ -57,7 +57,7 @@ pronouns:  He/Him
 
 <div align="center">
 
-<a href="https://github.com/the-shramik/agentic-data-upgrade"><img src="https://github-readme-stats.vercel.app/api/pin/?username=the-shramik&repo=agentic-data-upgrade&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f" width="49%"/></a>
+<a href="https://github.com/the-shramik/RealTime-InterviewBot"><img src="https://github-readme-stats.vercel.app/api/pin/?username=the-shramik&repo=RealTime-InterviewBot&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f" width="49%"/></a>
 <a href="https://github.com/the-shramik/Spring-AI-Agentic-Patterns"><img src="https://github-readme-stats.vercel.app/api/pin/?username=the-shramik&repo=Spring-AI-Agentic-Patterns&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f" width="49%"/></a>
 <a href="https://github.com/the-shramik/AI-Engineering-Project-Spring-AI-"><img src="https://github-readme-stats.vercel.app/api/pin/?username=the-shramik&repo=AI-Engineering-Project-Spring-AI-&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f" width="49%"/></a>
 <a href="https://github.com/the-shramik/payment-gateway-spring-boot"><img src="https://github-readme-stats.vercel.app/api/pin/?username=the-shramik&repo=payment-gateway-spring-boot&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f" width="49%"/></a>
@@ -73,9 +73,8 @@ pronouns:  He/Him
 <img src="https://github-readme-stats.vercel.app/api?username=the-shramik&show_icons=true&include_all_commits=true&count_private=true&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&icon_color=c084fc&border_color=12324f&ring_color=5ef2ff" height="170" alt="GitHub stats"/>
 <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=the-shramik&layout=compact&langs_count=6&bg_color=04122a&title_color=5ef2ff&text_color=c9e8ff&border_color=12324f" height="170" alt="Top languages"/>
 
-<img src="https://streak-stats.demolab.com?user=the-shramik&background=04122A&border=12324F&stroke=12324F&ring=5EF2FF&fire=C084FC&currStreakNum=E0FBFF&sideNums=E0FBFF&currStreakLabel=5EF2FF&sideLabels=7DD3FC&dates=94C9E0" width="80%" alt="GitHub streak"/>
+<img src="https://streak-stats.demolab.com?user=the-shramik&background=04122A&border=12324F&stroke=12324F&ring=5EF2FF&fire=C084FC&currStreakNum=E0FBFF&sideNums=E0FBFF&currStreakLabel=5EF2FF&sideLabels=7DD3FC&dates=94C9E0" height="170" alt="GitHub streak"/>
 
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=the-shramik&bg_color=04122a&color=7dd3fc&line=5ef2ff&point=c084fc&area=true&area_color=0e7490&hide_border=true&custom_title=Contribution%20Flow" width="100%" alt="Contribution graph"/>
 
 </div>
 
