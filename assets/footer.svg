@@ -169,7 +169,7 @@
     <g transform="translate(537 200) scale(1.13)"><g class="seed" style="--t:14.4s;--s:26px;animation-delay:-15.6s"><rect x="-10" y="-200" width="20" height="200" fill="none"/><circle r="9" fill="url(#seedg)" opacity=".55"/><g stroke="#e8fdff" stroke-width=".7" stroke-linecap="round" opacity=".9"><path d="M0 0 C-4 -5 -7 -8 -9 -12"/><path d="M0 0 C4 -5 7 -8 9 -12"/><path d="M0 0 C-1 -6 -1 -10 0 -14"/><path d="M0 0 C-6 -2 -9 -4 -12 -6"/><path d="M0 0 C6 -2 9 -4 12 -6"/></g><circle r="1.8" fill="#fff"/></g></g>
     <g text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif">
       <text x="600" y="88" font-size="26" font-weight="700" letter-spacing="6" fill="#e0fbff" filter="url(#glow)">OEL NGATI KAMEIE</text>
-      <text x="600" y="118" font-size="14" letter-spacing="3" fill="#7dd3fc">I SEE YOU — THANKS FOR VISITING</text>
+      <text x="600" y="118" font-size="14" letter-spacing="3" fill="#7dd3fc">I SEE YOU  ·  THANKS FOR VISITING</text>
     </g>
   </g>
 </svg>
